@@ -5,7 +5,7 @@ APP_ABI := armeabi-v7a
 APP_OPTIM := debug
 
 APP_PLATFORM := android-8
-NDK_TOOLCHAIN_VERSION=4.8
+NDK_TOOLCHAIN_VERSION=4.9
 # NDK_TOOLCHAIN_VERSION=4.7
 
 # system stlport_static stlport_shared gnustl_static gnustl_shared gabi++_static gabi++_shared none

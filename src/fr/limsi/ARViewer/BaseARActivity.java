@@ -88,7 +88,7 @@ public abstract class BaseARActivity extends Activity
 
             // NativeApp.init(getAppType(), getStorageDir(), previewSize.width, previewSize.height);
             // NativeApp.init(getAppType(), getStorageDir(), 640, 480); // XXX: hardcoded preview size
-            NativeApp.init(getAppType(), getStorageDir()); //, 800, 480); // XXX: hardcoded preview size
+            NativeApp.init(getAppType(), "/storage/emulated/legacy/Android/data/fr.limsi.ARViewer/files"); //, 800, 480); // XXX: hardcoded preview size
 
             initialized = true;
         }
@@ -331,7 +331,8 @@ public abstract class BaseARActivity extends Activity
     }
 
     protected String getStorageDir() {
-        return getExternalFilesDir(null).getAbsolutePath();
+        String s = getExternalFilesDir(null).getAbsolutePath();
+		return s.replaceAll("/0/", "/legacy/");
     }
 
     // From: KiwiViewerActivity.java
@@ -340,6 +341,7 @@ public abstract class BaseARActivity extends Activity
         String storageDir = getStorageDir();
 
         String destFilename = storageDir + "/" + fileName;
+		Log.e(TAG, "destFileName : " + destFilename);
 
         File destFile = new File(destFilename);
         if (destFile.exists() && !force)

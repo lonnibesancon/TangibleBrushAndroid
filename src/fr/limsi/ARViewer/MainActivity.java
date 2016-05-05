@@ -88,7 +88,9 @@ import com.google.atap.tangoservice.*;
 
 // import com.qualcomm.QCAR.QCAR;
 // // import com.qualcomm.ar.pl.CameraPreview;
-// import com.lannbox.rfduinotest.RFduinoService;
+import com.lannbox.rfduinotest.RFduinoService;
+import com.lannbox.rfduinotest.EditData;
+import com.lannbox.rfduinotest.HexAsciiHelper;
 
 public class MainActivity extends BaseARActivity
  implements View.OnTouchListener, GestureDetector.OnDoubleTapListener, Tango.OnTangoUpdateListener, SensorEventListener, InteractionMode, OnClickListener, BluetoothAdapter.LeScanCallback //, View.OnLongClickListener
@@ -765,169 +767,6 @@ public class MainActivity extends BaseARActivity
        // Log.d(TAG, "onAccuracyChanged");
    }
 
-    // =============================================
-
-
-    // @Override
-    // protected void onStart() {
-    //     super.onStart();
-    //
-    //     registerReceiver(scanModeReceiver, new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
-    //     registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-    //     registerReceiver(rfduinoReceiver, RFduinoService.getIntentFilter());
-    //
-    //     if (bluetoothAdapter != null)
-    //         updateState(bluetoothAdapter.isEnabled() ? STATE_DISCONNECTED : STATE_BLUETOOTH_OFF);
-    // }
-
-    // @Override
-	// public void previewSizeChanged(int width, int height) {
-    //     // NativeApp.init(getAppType(), getStorageDir(), width, height);
-    // }
-
-    // @Override
-    // protected void onStop() {
-    //     super.onStop();
-    //
-    //     // if (rfduinoService != null)
-    //     //     rfduinoService.disconnect();
-    //     try {
-    //         stopService(new Intent(this, RFduinoService.class));
-    //         unbindService(rfduinoServiceConnection);
-    //     } catch (Exception e) {}
-    //
-    //     if (bluetoothAdapter != null)
-    //         bluetoothAdapter.stopLeScan(this);
-    //
-    //     unregisterReceiver(scanModeReceiver);
-    //     unregisterReceiver(bluetoothStateReceiver);
-    //     unregisterReceiver(rfduinoReceiver);
-    // }
-
-
-    // private void upgradeState(int newState) {
-    //     if (newState > state) {
-    //         updateState(newState);
-    //     }
-    // }
-    //
-    // private void downgradeState(int newState) {
-    //     if (newState < state) {
-    //         updateState(newState);
-    //     }
-    // }
-    //
-    // private void updateState(int newState) {
-    //     state = newState;
-    //
-    //     TextView statusText = (TextView)findViewById(R.id.textOverlay);
-    //     switch (state) {
-    //         case STATE_BLUETOOTH_OFF:
-    //             statusText.setText("");
-    //             break;
-    //         case STATE_DISCONNECTED:
-    //             statusText.setText("");
-    //             break;
-    //         case STATE_CONNECTING:
-    //             statusText.setText("connecting...");
-    //             break;
-    //         case STATE_CONNECTED:
-    //             statusText.setText("connected");
-    //             break;
-    //     }
-    //
-    //     updateConnectionProcess();
-    // }
-    //
-    // private void updateConnectionProcess() {
-    //     // switch (state) {
-    //     //     case STATE_BLUETOOTH_OFF:
-    //     //         break;
-    //
-    //     //     case STATE_DISCONNECTED:
-    //     //         break;
-    //
-    //     //     case STATE_CONNECTING:
-    //     //         break;
-    //
-    //     //     case STATE_CONNECTED:
-    //     //         break;
-    //     // }
-    //
-    //     Log.d(TAG, "updateConnectionProcess state=" + state);
-    //
-    //     if (state == STATE_DISCONNECTED) {
-    //         Log.d(TAG, "state_disconnected bluetoothDevice=" + bluetoothDevice + " scanStarted=" + scanStarted);
-    //         if (bluetoothDevice == null) {
-    //             if (!scanStarted) {
-    //                 scanStarted = true;
-    //                 Log.d(TAG, "starting scan");
-    //                 bluetoothAdapter.startLeScan(new UUID[] { RFduinoService.UUID_SERVICE }, this);
-    //             }
-    //         } else {
-    //             Intent rfduinoIntent = new Intent(this, RFduinoService.class);
-    //             Log.d(TAG, "bindService");
-    //             bindService(rfduinoIntent, rfduinoServiceConnection, BIND_AUTO_CREATE);
-    //         }
-    //     }
-    // }
-    //
-    // @Override
-    // public void onLeScan(BluetoothDevice device, final int rssi, final byte[] scanRecord) {
-    //     Log.d(TAG, "onLeScan");
-    //     bluetoothAdapter.stopLeScan(this);
-    //     bluetoothDevice = device;
-    //
-    //     /*GyroActivity.this.*/runOnUiThread(new Runnable() {
-    //         @Override
-    //         public void run() {
-    //             updateConnectionProcess();
-    //         }
-    //     });
-    // }
-
-    // private boolean mButton1Pressed = false, mButton2Pressed = false;
-    // private void addData(byte[] data) {
-    //     // if (data.length < 2) {
-    //     //     Log.w(TAG, "wrong data length received: " + data.length);
-    //     //     return;
-    //     // }
-    //
-    //     // Log.d(TAG, "button state: " + data[0] + " " + data[1]);
-    //     // Log.d(TAG, "button state: " + data[0]);
-    //     boolean button1Pressed = ((data[0] & (1 << 0)) != 0);
-    //     boolean button2Pressed = ((data[0] & (1 << 1)) != 0);
-    //     Log.d(TAG, "button state: " + button1Pressed + " " + button2Pressed);
-    //
-    //     if (button1Pressed != mButton1Pressed) {
-    //         if (button1Pressed) {
-    //             Log.d(TAG, "button1 pressed");
-    //             FluidMechanics.releaseParticles();
-    //         } else {
-    //             Log.d(TAG, "button1 released");
-    //         }
-    //         mButton1Pressed = button1Pressed;
-    //     }
-    //
-    //     if (button2Pressed != mButton2Pressed) {
-    //         if (button2Pressed) {
-    //             Log.d(TAG, "button2 pressed");
-    //             FluidMechanics.buttonPressed();
-    //         } else {
-    //             Log.d(TAG, "button2 released");
-    //             fluidSettings.surfacePercentage = FluidMechanics.buttonReleased();
-    //         }
-    //         mButton2Pressed = button2Pressed;
-    //     }
-    // }
-
-    // @Override
-    // protected void onPause() {
-    //     super.onPause();
-    //     if (mCameraPreview != null)
-    //         mCameraPreview.pause();
-    // }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -940,13 +779,7 @@ public class MainActivity extends BaseARActivity
         }
         mSensorManager.unregisterListener(this);
     }
-    // @Override
-    // protected void onResume() {
-    //     super.onResume();
-    //     if (mCameraPreview != null)
-    //         mCameraPreview.resume();
-    //     QCAR.onResume();
-    // }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -985,25 +818,6 @@ public class MainActivity extends BaseARActivity
         //writeLogging();
         super.onStop() ;
     }
-
-   
-    // @Override
-    // protected void processVideoFrame(final byte[] data, Camera camera) {
-    //     // Log.d(TAG, "processVideoFrame");
-    //     if (com.qualcomm.ar.pl.CameraPreview.instance.isReady()) {
-    //         // Log.d(TAG, "QCAR onPreviewFrame");
-    //         com.qualcomm.ar.pl.CameraPreview.instance.onPreviewFrame(data, camera);
-    //     }
-    //     super.processVideoFrame(data, camera);
-    //
-    //     if (mButton2Pressed) {
-    //         FluidMechanics.getSettings(tempSettings);
-    //         // Log.d(TAG, "temp percentage = " + tempSettings.surfacePercentage);
-    //         // Log.d(TAG, "temp slider = " + (int)(tempSettings.surfacePercentage * 100));
-    //         final VerticalSeekBar slider = (VerticalSeekBar)findViewById(R.id.verticalSlider);
-    //         slider.customSetProgress((int)(tempSettings.surfacePercentage * 100));
-    //     }
-    // }
 
     private void loadNewData() {
         loadDataset(++mDataSet);
@@ -1066,14 +880,6 @@ public class MainActivity extends BaseARActivity
 
     }
 
-    // public class ContextMenuFragment extends Fragment {
-    //     @Override
-    //     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    //         View root = inflater.inflate(R.layout.main, container, false);
-    //         registerForContextMenu(root.findViewById(R.id.glSurfaceView));
-    //         return root;
-    //     }
-
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
             super.onCreateContextMenu(menu, v, menuInfo);
@@ -1088,15 +894,11 @@ public class MainActivity extends BaseARActivity
             /*MainActivity.this.*/loadDataset(item.getItemId());
             return super.onContextItemSelected(item);
         }
-    // }
 
     private void setupActionBar() {
         // Remove the title text and icon from the action bar
         getActionBar().setDisplayShowTitleEnabled(false);
         getActionBar().setDisplayShowHomeEnabled(false);
-        // // Make the action bar (partially) transparent
-        // // getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(0, 0, 0, 0)));
-        // getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(100, 0, 0, 0)));
         getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_bg));
     }
 
@@ -1243,25 +1045,6 @@ public class MainActivity extends BaseARActivity
                 mPressed = false;
 
                 //If we want the precision to be user-controlled
-                /*final Handler handler = new Handler();
-                handler.postDelayed(new Runnable(){
-                    @Override
-                    public void run(){
-                        sliderPrecision.setMax( (max - min) / step ); //Have to call because setProgress does not update the view
-                        sliderPrecision.customSetProgress((int)(initialPosition));
-                        //sliderPrecision.setMax( (max - min) / step ); //Have to call because setProgress does not update the view
-                        //sliderPrecision.onSizeChanged(sliderPrecision.getWidth(), sliderPrecision.getHeight(), 0,0);
-                        fluidSettings.precision = 1 ;
-                        mPressed = false;
-                    }
-                },100);*/
-                /*sliderPrecision.setMax( (max - min) / step ); //Have to call because setProgress does not update the view
-                sliderPrecision.customSetProgress((int)(initialPosition));
-                //sliderPrecision.setMax( (max - min) / step ); //Have to call because setProgress does not update the view
-                //sliderPrecision.onSizeChanged(sliderPrecision.getWidth(), sliderPrecision.getHeight(), 0,0);
-                fluidSettings.precision = 1 ;
-                mPressed = false;
-                //Log.d(TAG, "Precision Java = " + mProgress);*/
             }
 
             @Override
@@ -1269,12 +1052,6 @@ public class MainActivity extends BaseARActivity
                 // Only handle events called from VerticalSeekBar. Other events, generated
                 // from the base class SeekBar, contain bogus values because the Android
                 // SeekBar was not meant to be vertical.
-                /*if (fromUser)
-                    return;
-
-                if (!mPressed)
-                    return;*/
-
                 
                 mProgress = (double)progress/seekBar.getMax();
                 // Log.d(TAG, "mProgress = " + mProgress);
@@ -1315,13 +1092,6 @@ public class MainActivity extends BaseARActivity
             settings.showCamera = menu.findItem(R.id.action_showCamera).isChecked();
             fluidSettings.showCrossingLines = menu.findItem(R.id.action_showLines).isChecked();
 
-            /*constrainX = menu.findItem(R.id.action_constrainX).isChecked();
-            constrainY = menu.findItem(R.id.action_constrainY).isChecked();
-            constrainZ = menu.findItem(R.id.action_constrainZ).isChecked();
-            constrainTranslation = menu.findItem(R.id.action_constrainTranslation).isChecked();
-            constrainRotation = menu.findItem(R.id.action_constrainRotation).isChecked();
-            this.autoConstraint = menu.findItem(R.id.action_autoConstraint).isChecked();*/
-
             updateSettings();
             updateDataSettings();
 
@@ -1336,13 +1106,6 @@ public class MainActivity extends BaseARActivity
             menu.findItem(R.id.action_showOutline).setChecked(fluidSettings.showOutline);
             menu.findItem(R.id.action_axisClipping).setChecked(fluidSettings.sliceType == FluidMechanics.SLICE_AXIS);
             menu.findItem(R.id.action_stylusClipping).setChecked(fluidSettings.sliceType == FluidMechanics.SLICE_STYLUS);
-
-            /*menu.findItem(R.id.action_constrainX).setChecked(constrainX);
-            menu.findItem(R.id.action_constrainY).setChecked(constrainY);
-            menu.findItem(R.id.action_constrainZ).setChecked(constrainZ);
-            menu.findItem(R.id.action_constrainTranslation).setChecked(constrainTranslation);
-            menu.findItem(R.id.action_constrainRotation).setChecked(constrainRotation);
-            menu.findItem(R.id.action_autoConstraint).setChecked(autoConstraint);*/
         }
 
         return true;
@@ -1427,61 +1190,6 @@ public class MainActivity extends BaseARActivity
             case R.id.action_clipDist:
                 showDistanceDialog();
                 break;
-
-    /*// Interaction Mode 
-        // We manipulate DATA 
-            case R.id.action_dataTangible:
-                changeInteractionMode(dataTangible);
-                break;
-
-            case R.id.action_dataTouch:
-                changeInteractionMode(dataTouch);
-                break ;
-
-            case R.id.action_dataHybrid:
-                //changeInteractionMode(dataTouchTangible);
-                //changeInteractionMode(dataHybrid);
-                break ;
-
-        // We manipulate the plane xz
-            case R.id.action_planeTouch:
-                //changeInteractionMode(planeTouch);
-                break ;
-
-            case R.id.action_planeTangible:
-                //changeInteractionMode(planeTangible);
-                break ;
-
-            case R.id.action_planeHybrid:
-                //changeInteractionMode(planeHybrid);
-                break ;
-
-        // We manipulate data + Plane 
-            case R.id.action_dataPlaneTouch:
-                //changeInteractionMode(dataPlaneTouch);
-                break ;
-
-            case R.id.action_dataPlaneTangible:
-                //changeInteractionMode(dataPlaneTangible);
-                break ;
-
-            case R.id.action_dataPlaneHybrid:
-                //changeInteractionMode(dataPlaneHybrid);
-                break ;
-
-        // Seeding mode 
-            case R.id.action_seedingTangible:
-                //changeInteractionMode(seedPointTangible);
-                break ;
-
-            case R.id.action_seedingTouch:
-                //changeInteractionMode(seedPointTouch);
-                break ;
-
-            case R.id.action_seedingHybrid:
-                //changeInteractionMode(seedPointHybrid);
-                break ;
-        */
             case R.id.change_IP:
                 changeIP();
                 break ;
@@ -1506,111 +1214,6 @@ public class MainActivity extends BaseARActivity
                 //android.os.Process.killProcess(android.os.Process.myPid());
                 System.exit(0);
                 break ;
-
-// End Menu Action                
-// Constraining interaction
-/*
-            //Constraining interaction part
-            case R.id.action_constrainX:
-                constrainX = !constrainX ;
-                //If constrainX, we want to set value in JNI to 0
-                tmp = (constrainX) ? 0 : 1;  
-                //fluidSettings.constrainX = tmp; 
-                updateConstraintX();
-                item.setChecked(constrainX);
-                Log.d(TAG,"tmp = "+tmp);
-                handledDataSetting = true ;
-                break;
-
-            case R.id.action_constrainY:
-                constrainY = !constrainY ;
-                //If constrainX, we want to set value in JNI to 0
-                tmp = (constrainY) ? 0 : 1;  
-                //fluidSettings.constrainY = tmp; 
-                updateConstraintY();
-                item.setChecked(constrainY);
-                Log.d(TAG,"tmp = "+tmp);
-                handledDataSetting = true;
-                break;
-
-            case R.id.action_constrainZ:
-                constrainZ = !constrainZ ;
-                //If constrainX, we want to set value in JNI to 0
-                tmp = (constrainZ) ? 0 : 1;  
-                //fluidSettings.constrainZ = tmp; 
-                updateConstraintZ();
-                item.setChecked(constrainZ);
-                Log.d(TAG,"tmp = "+tmp);
-                handledDataSetting = true;
-                break;
-
-            case R.id.action_constrainTranslation:
-                constrainTranslation = !constrainTranslation ;
-                //If considerX, we want to set value in JNI to 0
-                //tmp = (constrainTranslation) ? 0 : 1;  
-                tmp = (constrainTranslation) ? 1 : 0;  
-                fluidSettings.considerTranslation = tmp; 
-
-                //Now for rotation
-                tmp = (constrainTranslation) ? 0 : 1;
-                fluidSettings.considerRotation = tmp ;
-
-
-                //And then we enable all the axis
-                constrainX = false ;
-                constrainY = false ;
-                constrainZ = false ;
-                constrainTranslation = false ;
-                fluidSettings.considerX = 1 ;
-                fluidSettings.considerY = 1 ;
-                fluidSettings.considerZ = 1 ;
-
-                item.setChecked(constrainTranslation);
-                Log.d(TAG,"tmp = "+tmp);
-                handledDataSetting = true;
-                break;
-
-
-
-            case R.id.action_constrainRotation:
-                constrainRotation = !constrainRotation ;
-                //If considerX, we want to set value in JNI to 0
-                //tmp = (constrainRotation) ? 0 : 1;  
-                tmp = (constrainRotation) ? 1 : 0;  
-                fluidSettings.considerRotation = tmp; 
-
-                //Now for rotation
-                tmp = (constrainRotation) ? 0 : 1;
-                fluidSettings.considerTranslation = tmp ;
-
-                //And then we enable all the axis
-                constrainX = false ;
-                constrainY = false ;
-                constrainZ = false ;
-                constrainRotation = false ;
-                fluidSettings.considerX = 1 ;
-                fluidSettings.considerY = 1 ;
-                fluidSettings.considerZ = 1 ;
-
-                item.setChecked(constrainRotation);
-                Log.d(TAG,"tmp = "+tmp);
-                handledDataSetting = true;
-                break;
-
-            case R.id.action_autoConstraint:
-                this.autoConstraint = !this.autoConstraint;
-                fluidSettings.autoConstraint = this.autoConstraint ;
-                item.setChecked(this.autoConstraint);
-                fluidSettings.considerX = 1 ;
-                fluidSettings.considerY = 1 ;
-                fluidSettings.considerZ = 1 ;
-                fluidSettings.considerRotation = 0 ;
-                fluidSettings.considerTranslation = 1 ;
-                handledDataSetting = true;
-                break ;
-
-*/
-            
 
             /* Dataset */
             case R.id.action_dataset_ftle:
@@ -1895,28 +1498,6 @@ public class MainActivity extends BaseARActivity
             
             //return true ;
         }
-  
-        /*else if(v.getId() == R.id.sliceBtn){
-            //TODO
-            //return true ;
-            int index = event.getActionIndex();
-            //Log.d(TAG,"Slice Button");
-
-            return true ;
-        }*/
-
-        /*else if(v.getId() == R.id.translateBtn){
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.translatePlane = true ;
-                this.translateBtn.setPressed(true);
-            }
-            else if(event.getAction() == MotionEvent.ACTION_UP ){
-                fluidSettings.translatePlane = false ;
-                this.translateBtn.setPressed(false);
-            }
-            updateDataSettings();
-            
-        }*/
 
         else if(v.getId() == R.id.constrainX){
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
@@ -2073,39 +1654,6 @@ public class MainActivity extends BaseARActivity
                     break ;
                 }
             }
-            /*if(event.getPointerCount() == 2){
-                if(isOnTouchButton(rawPosX[0], rawPosY[0]) == false && isOnTouchButton(rawPosX[1], rawPosY[1]) == false){
-
-                    float dx = event.getX(0) - event.getX(1);
-                    float dy = event.getY(0) - event.getY(1);
-                    float dist = (float)Math.sqrt(dx*dx + dy*dy);
-                    this.interactionType = touchInteraction ;
-                    
-                    switch (event.getActionMasked()) {
-                        case MotionEvent.ACTION_POINTER_DOWN: {
-                            mInitialPinchDist = dist;
-                            mInitialZoomFactor = settings.zoomFactor;
-                            mZoomGesture = true;
-                            break;
-                        }
-                        case MotionEvent.ACTION_MOVE: {
-                            // settings.zoomFactor = mInitialZoomFactor * (float)Math.pow(dist/mInitialPinchDist, zoomExponent);
-                            if(dist > thresholdRST){
-                                settings.zoomFactor = mInitialZoomFactor * dist/mInitialPinchDist;
-                                if (settings.zoomFactor <= 0.25f)
-                                    settings.zoomFactor = 0.25f;
-                                updateSettings();
-                            }
-                            break;
-                        }
-                    }
-                   
-                }
-                
-                
-            }*/
-
-
 
             this.isInteracting = true ;
             requestRender();
@@ -2115,92 +1663,11 @@ public class MainActivity extends BaseARActivity
 
         }
 
-        /*if (mDatasetLoaded) {
-            if (event.getPointerCount() == 1) {
-                // Log.d(TAG, "action = " + event.getActionMasked());
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                    {
-                        Log.d(TAG, "pointer down");
-                        if (mVelocityDatasetLoaded) {
-                            FluidMechanics.releaseParticles();
-                            // mButton1Pressed = true;
-                        } else {
-                            FluidMechanics.buttonPressed();
-                            // mButton2Pressed = true;
-                        }
-                        break;
-                    }
-
-                    case MotionEvent.ACTION_UP:
-                    {
-                        Log.d(TAG, "pointer up");
-                        //fluidSettings.surfacePercentage = FluidMechanics.buttonReleased();
-                        FluidMechanics.buttonReleased();
-                        // mButton1Pressed = false;
-                        // mButton2Pressed = false;
-                        break;
-                    }
-
-                }
-            }
-        }
-
-        if (event.getPointerCount() <= 1) {
-            int action = event.getActionMasked();
-
-            if (action == MotionEvent.ACTION_UP) {
-                mZoomGesture = false;
-            }
-        } else {
-            float dx = event.getX(0) - event.getX(1);
-            float dy = event.getY(0) - event.getY(1);
-            float dist = (float)Math.sqrt(dx*dx + dy*dy);
-
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_POINTER_DOWN: {
-                    mInitialPinchDist = dist;
-                    mInitialZoomFactor = settings.zoomFactor;
-                    mZoomGesture = true;
-                    break;
-                }
-                case MotionEvent.ACTION_MOVE: {
-                    // settings.zoomFactor = mInitialZoomFactor * (float)Math.pow(dist/mInitialPinchDist, zoomExponent);
-                    settings.zoomFactor = mInitialZoomFactor * dist/mInitialPinchDist;
-                    if (settings.zoomFactor <= 0.25f)
-                        settings.zoomFactor = 0.25f;
-                    updateSettings();
-                    break;
-                }
-            }
-
-            // NativeApp.setZoom(mZoomFactor);
-        }*/
-
         return true;
     }
 
-    // // Handle mouse wheel events
-    // @Override
-    // public boolean onGenericMotionEvent(MotionEvent event) {
-    //     if (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) {
-    //         switch (event.getAction()) {
-    //             case MotionEvent.ACTION_SCROLL:
-    //                 if (event.getAxisValue(MotionEvent.AXIS_VSCROLL) < 0.0f)
-    //                     Log.d(TAG, "wheel down");
-    //                 else
-    //                     Log.d(TAG, "wheel up");
-    //                 return true;
-    //         }
-    //     }
-    //     return super.onGenericMotionEvent(event);
-    // }
-
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-        //Log.d(TAG, "onDoubleTap");
-        // loadNewData();
-        //openContextMenu(findViewById(R.id.glSurfaceView));
         return true;
     }
 
@@ -2210,28 +1677,8 @@ public class MainActivity extends BaseARActivity
         return true;
     }
 
-	// @Override
-    // public boolean onLongClick(View view) {
-    //     openContextMenu(findViewById(R.id.glSurfaceView));
-    //     return true;
-    // }
-
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        // Log.d(TAG, "onSingleTapConfirmed");
-
-        // try {
-        //     stopService(new Intent(this, RFduinoService.class));
-        //     unbindService(rfduinoServiceConnection);
-        // } catch (Exception e2) {}
-        //
-        // // if (state == STATE_DISCONNECTED) {
-        // if (state != STATE_CONNECTED) {
-        //     Intent rfduinoIntent = new Intent(this, RFduinoService.class);
-        //     Log.d(TAG, "bindService");
-        //     bindService(rfduinoIntent, rfduinoServiceConnection, BIND_AUTO_CREATE);
-        // }
-
         return true;
     }
 
@@ -2240,8 +1687,6 @@ public class MainActivity extends BaseARActivity
             //Log.d(TAG,"RequestRender");
             mView.requestRender();
             client.setData(FluidMechanics.getData());
-            //Log.d(TAG,"Request Render");
-            //loggingFunction(); 
         }
             
    } 
@@ -2262,80 +1707,7 @@ public class MainActivity extends BaseARActivity
 
     @Override
     public void onClick(View v) {
-        //int tmp ;
-        //Log.d(TAG,"On click listener");
-        /*if(v.getId() == R.id.translateBtn){
-            fluidSettings.translatePlane = !fluidSettings.translatePlane ;
-            Log.d(TAG,"TranslatePlane = "+fluidSettings.translatePlane);
-            updateDataSettings();
-        }*/
-        /*if(v.getId() == R.id.tangibleBtn){
-            //Log.d(TAG, "Tangible Button");
-            this.tangibleModeActivated = !this.tangibleModeActivated ;
-            if(this.tangibleModeActivated){
-                //this.tangibleBtn.setBackgroundColor(Color.ORANGE);
-                FluidMechanics.buttonPressed();    
-            }
-            else{
-                //this.tangibleBtn.setBackgroundColor(Color.DARK_GRAY);
-                FluidMechanics.buttonReleased();
-            }
-        }
-
-        else if(v.getId() == R.id.sliceBtn){
-            //TODO
-        }
-
-        else if(v.getId() == R.id.constrainX){
-            constrainX = !constrainX ;
-            //If constrainX, we want to set value in JNI to 0
-            tmp = (constrainX) ? 0 : 1;  
-            //fluidSettings.constrainX = tmp; 
-            updateConstraintX();
-            Log.d(TAG,"tmp = "+tmp);
-            updateDataSettings();
-        }
-
-        else if(v.getId() == R.id.constrainY){
-            constrainY = !constrainY ;
-            //If constrainX, we want to set value in JNI to 0
-            tmp = (constrainY) ? 0 : 1;  
-            //fluidSettings.constrainY = tmp; 
-            updateConstraintY();
-            Log.d(TAG,"tmp = "+tmp);
-            updateDataSettings();
-        }
-
-        else if(v.getId() == R.id.constrainZ){
-            constrainZ = !constrainZ ;
-            //If constrainX, we want to set value in JNI to 0
-            tmp = (constrainZ) ? 0 : 1;  
-            //fluidSettings.constrainZ = tmp; 
-            updateConstraintZ();
-            Log.d(TAG,"tmp = "+tmp);
-            updateDataSettings();
-        }
-
-        else if(v.getId() == R.id.autoConstrain ){
-            this.autoConstraint = !this.autoConstraint;
-            fluidSettings.autoConstraint = this.autoConstraint ;
-            fluidSettings.considerX = 1 ;
-            fluidSettings.considerY = 1 ;
-            fluidSettings.considerZ = 1 ;
-            fluidSettings.considerRotation = 0 ;
-            fluidSettings.considerTranslation = 1 ;
-            updateDataSettings();
-        }*/
     }
-
-
-
-
-
-
-
-
-
 
     //Bluetooth
 
@@ -2511,17 +1883,7 @@ public class MainActivity extends BaseARActivity
 
     protected void createBluetooth(){
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        // if (bluetoothAdapter.isEnabled()) {
-             // Reboot the bluetooth adapter to make sure the RFDuino
-             // will be correctly detected
-        //     mTogglingBluetooth = true;
-             Log.d(TAG, "toggling bluetooth...");
-        //     registerReceiver(bluetoothStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-        //     bluetoothAdapter.disable();
-        // } else {
-        //     if (!bluetoothAdapter.enable())
-        //         Log.w(TAG, "Failed to enable Bluetooth!");
-        // }
+		 Log.d(TAG, "toggling bluetooth...");
     }
 
     protected void connectBle(){

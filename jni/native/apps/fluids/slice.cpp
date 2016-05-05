@@ -230,7 +230,7 @@ void Slice::setSlice(const Matrix4& mat, float clipDist, float zoomFactor)
 				// float value = *ptr;
 				// ptr += N;
 				// FIXME: hardcoded constant (signed int16 max, see head.vti)
-				bool isinf = (__isinf(value) || value == 32767 || value == 255);
+				bool isinf = (std::isinf(value) || value == 32767 || value == 255);
 				mTextureData[i*2+1] = (isinf ? 0 : 255);
 				if (!isinf) {
 					notEmpty = true;

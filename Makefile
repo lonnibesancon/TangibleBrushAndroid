@@ -1,6 +1,6 @@
 MAIN_ACTIVITY=fr.limsi.ARViewer/.$(shell grep "<activity android:name" AndroidManifest.xml | cut -d\" -f2)
-SDK_PATH=/Users/lonnibesancon/Library/Android/sdk
-NDK_PATH=/Users/lonnibesancon/Library/Android/android-ndk-r10e
+SDK_PATH=/opt/android-sdk
+NDK_PATH=/opt/android-ndk
 
 APP_TAG=ARViewer
 LOG_FILTER=$(APP_TAG):V NativeApp:V VES:V AndroidRuntime:E libEGL:W StrictMode:V libc:F DEBUG:I
