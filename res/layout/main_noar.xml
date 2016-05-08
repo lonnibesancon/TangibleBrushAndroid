@@ -189,8 +189,7 @@
                       android:layout_width="120dp"
                       android:layout_alignParentRight="true"
                       android:textOn="Data"
-                      android:textOff="Plane" />  
-
+                      android:textOff="Selection" />  
               </GridLayout>
         
        <!--<Button

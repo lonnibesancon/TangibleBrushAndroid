@@ -872,7 +872,7 @@ public class MainActivity extends BaseARActivity
         updateDataState();
         // settings.zoomFactor = fluidState.computedZoomFactor;
         settings.zoomFactor = fluidState.computedZoomFactor * 0.75f;
-        fluidSettings.showSlice = true ;
+        fluidSettings.showSlice = false ;
         fluidSettings.sliceType = FluidMechanics.SLICE_STYLUS ;
         updateSettings();
         mDatasetLoaded = true;

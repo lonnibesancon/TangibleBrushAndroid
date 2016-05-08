@@ -153,7 +153,7 @@ struct FluidMechanics::Impl
 	Synchronized<std::vector<Vector3> > prevFingerPositions ;
 	Synchronized<std::vector<std::vector<Vector3>>> movementPositions;
 	int lastFingerID;
-	Vector3[2] lastSelection;
+	Vector3 lastSelection[2];
 
 	Vector2 initialVector ;
 	Vector3 prevVec ;
@@ -974,7 +974,6 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 	}
 
 	//Now we update the rendering according to constraints and interaction mode
-
 	rz *=settings->precision ;
 	ry *=settings->precision ;
 	rx *=settings->precision ;
@@ -1002,7 +1001,6 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 		}
 
 		//Now for the automatic constraining of interaction
-
 	}
 	
 }
@@ -1619,6 +1617,8 @@ void FluidMechanics::Impl::updateSlicePlanes()
 // (GL context)
 void FluidMechanics::Impl::renderObjects()
 {
+	//Comment this line to show the slice
+	settings->showSlice = false;
 	updateMatrices();
 	//checkPosition();
 	const Matrix4 proj = app->getProjMatrix();
@@ -1629,7 +1629,7 @@ void FluidMechanics::Impl::renderObjects()
 	glDisable(GL_CULL_FACE);
 	glDepthMask(true); // requires "discard" in the shader where alpha == 0
 
-	if (settings->clipDist > 0.0f) {
+	 if (settings->clipDist > 0.0f) {
 		// Set a depth value for the slicing plane
 		Matrix4 trans = Matrix4::identity();
 		// trans[3][2] = app->getDepthValue(settings->clipDist); // relative to trans[3][3], which is 1.0
@@ -1844,42 +1844,44 @@ void FluidMechanics::Impl::renderObjects()
 			}
 		}
 
-		LOGE("RENDER OBJECT");
 		//Render the rectangle selection
-		synchronized(movementPositions)
+		if(interactionMode==planeTouch)
 		{
-			int position = getFingerPos(lastFingerID);
-			if(position != -1 && movementPositions[position].size() >= 2)
+			synchronized(movementPositions)
 			{
-				Matrix4 rectangleMat = Matrix4(Matrix4::identity());
-				rectangleMat.setScale(2.0/screenW, 2.0/screenH, 1.0);
+				int position = getFingerPos(lastFingerID);
+				if(position != -1 && movementPositions[position].size() >= 2)
+				{
+					Matrix4 rectangleMat = Matrix4(Matrix4::identity());
+					rectangleMat.setScale(2.0/screenW, 2.0/screenH, 1.0);
 
-				std::vector<Vector3> rectangleLines;
-				Vector3 firstPos = movementPositions[position][0];
-				firstPos.y *= -1;
-				firstPos.y += screenH;
-				firstPos -= Vector3(screenW/2.0, screenH/2.0, 0.0);
-				firstPos   *= Vector3(2.0/screenW, 2.0/screenH, 1.0);
+					std::vector<Vector3> rectangleLines;
+					Vector3 firstPos = movementPositions[position][0];
+					firstPos.y *= -1;
+					firstPos.y += screenH;
+					firstPos -= Vector3(screenW/2.0, screenH/2.0, 0.0);
+					firstPos   *= Vector3(2.0/screenW, 2.0/screenH, 1.0);
 
-				Vector3 lastPos = movementPositions[position][movementPositions[position].size()-1];
-			   	lastPos.y *= -1;
-				lastPos.y += screenH;
-				lastPos   -= Vector3(screenW/2.0, screenH/2.0, 0.0);
-				lastPos   *= Vector3(2.0/screenW, 2.0/screenH, 1.0);
-				Vector3 v  = lastPos - firstPos;
-				LOGE("GET V %f %f %f", lastPos.x, lastPos.y, lastPos.z);
+					Vector3 lastPos = movementPositions[position][movementPositions[position].size()-1];
+					lastPos.y *= -1;
+					lastPos.y += screenH;
+					lastPos   -= Vector3(screenW/2.0, screenH/2.0, 0.0);
+					lastPos   *= Vector3(2.0/screenW, 2.0/screenH, 1.0);
+					Vector3 v  = lastPos - firstPos;
+					LOGE("GET V %f %f %f", lastPos.x, lastPos.y, lastPos.z);
 
-				rectangleLines.push_back(firstPos);
-				rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
-				rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
-				rectangleLines.push_back(lastPos);
-				rectangleLines.push_back(lastPos);
-				rectangleLines.push_back(lastPos - Vector3(v.x, 0.0, 0.0));
-				rectangleLines.push_back(lastPos - Vector3(v.x, 0.0, 0.0));
-				rectangleLines.push_back(firstPos);
-				lines->setLines(rectangleLines);
+					rectangleLines.push_back(firstPos);
+					rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
+					rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
+					rectangleLines.push_back(lastPos);
+					rectangleLines.push_back(lastPos);
+					rectangleLines.push_back(lastPos - Vector3(v.x, 0.0, 0.0));
+					rectangleLines.push_back(lastPos - Vector3(v.x, 0.0, 0.0));
+					rectangleLines.push_back(firstPos);
+					lines->setLines(rectangleLines);
 
-				lines->render(Matrix4::identity(), Matrix4::identity());
+					lines->render(Matrix4::identity(), Matrix4::identity());
+				}
 			}
 		}
 	}
