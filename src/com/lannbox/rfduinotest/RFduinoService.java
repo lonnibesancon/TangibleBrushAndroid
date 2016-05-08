@@ -42,15 +42,13 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.UUID;
-import java.util.Arrays;
 
 /*
  * Adapted from:
  * http://developer.android.com/samples/BluetoothLeGatt/src/com.example.android.bluetoothlegatt/BluetoothLeService.html
  */
 public class RFduinoService extends Service {
-    // private final static String TAG = RFduinoService.class.getSimpleName();
-    private final static String TAG = "ARViewer";
+    private final static String TAG = RFduinoService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -67,18 +65,11 @@ public class RFduinoService extends Service {
     public final static String EXTRA_DATA =
             "com.rfduino.EXTRA_DATA";
 
-    public static String shortUuidFormat = "0000%04X-0000-1000-8000-00805F9B34FB";
-
-    public static UUID sixteenBitUuid(long shortUuid) {
-        assert shortUuid >= 0 && shortUuid <= 0xFFFF;
-        return UUID.fromString(String.format(shortUuidFormat, shortUuid & 0xFFFF));
-    }
-
-    public final static UUID UUID_SERVICE = sixteenBitUuid(0x2220);
-    public final static UUID UUID_RECEIVE = sixteenBitUuid(0x2221);
-    public final static UUID UUID_SEND = sixteenBitUuid(0x2222);
-    public final static UUID UUID_DISCONNECT = sixteenBitUuid(0x2223);
-    public final static UUID UUID_CLIENT_CONFIGURATION = sixteenBitUuid(0x2902);
+    public final static UUID UUID_SERVICE = BluetoothHelper.sixteenBitUuid(0x2220);
+    public final static UUID UUID_RECEIVE = BluetoothHelper.sixteenBitUuid(0x2221);
+    public final static UUID UUID_SEND = BluetoothHelper.sixteenBitUuid(0x2222);
+    public final static UUID UUID_DISCONNECT = BluetoothHelper.sixteenBitUuid(0x2223);
+    public final static UUID UUID_CLIENT_CONFIGURATION = BluetoothHelper.sixteenBitUuid(0x2902);
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -106,14 +97,6 @@ public class RFduinoService extends Service {
 
                 BluetoothGattCharacteristic receiveCharacteristic =
                         mBluetoothGattService.getCharacteristic(UUID_RECEIVE);
-                // Log.d(TAG, receiveCharacteristic.getUuid().toString());
-                // Log.d(TAG, Integer.toString(receiveCharacteristic.getPermissions()));
-                // Log.d(TAG, Arrays.toString(receiveCharacteristic.getValue()));
-                // Log.d(TAG, Integer.toString(receiveCharacteristic.getProperties()));
-                // // D/ARViewer(15286): 00002221-0000-1000-8000-00805f9b34fb
-                // // D/ARViewer(15286): 0
-                // // D/ARViewer(15286): null
-                // // D/ARViewer(15286): 18
                 if (receiveCharacteristic != null) {
                     BluetoothGattDescriptor receiveConfigDescriptor =
                             receiveCharacteristic.getDescriptor(UUID_CLIENT_CONFIGURATION);
@@ -122,12 +105,6 @@ public class RFduinoService extends Service {
 
                         receiveConfigDescriptor.setValue(
                                 BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                        // Log.d(TAG, receiveConfigDescriptor.getUuid().toString());
-                        // Log.d(TAG, Integer.toString(receiveConfigDescriptor.getPermissions()));
-                        // Log.d(TAG, Arrays.toString(receiveConfigDescriptor.getValue()));
-                        // // D/ARViewer(15049): 00002902-0000-1000-8000-00805f9b34fb
-                        // // D/ARViewer(15049): 0
-                        // // D/ARViewer(15049): [1, 0]
                         gatt.writeDescriptor(receiveConfigDescriptor);
                     } else {
                         Log.e(TAG, "RFduino receive config descriptor not found!");
@@ -247,40 +224,8 @@ public class RFduinoService extends Service {
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        // mBluetoothGatt = device.connectGatt(this, false, null);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
-
-
-
-        // BluetoothGattCharacteristic receiveCharacteristic = new BluetoothGattCharacteristic(UUID_RECEIVE, 18, 0);
-        // // receiveCharacteristic.setValue(null);
-        // Log.d(TAG, receiveCharacteristic.getUuid().toString());
-        // Log.d(TAG, Integer.toString(receiveCharacteristic.getPermissions()));
-        // Log.d(TAG, Arrays.toString(receiveCharacteristic.getValue()));
-        // Log.d(TAG, Integer.toString(receiveCharacteristic.getProperties()));
-        // // D/ARViewer(15286): 00002221-0000-1000-8000-00805f9b34fb
-        // // D/ARViewer(15286): 0
-        // // D/ARViewer(15286): null
-        // // D/ARViewer(15286): 18
-        // mBluetoothGatt.setCharacteristicNotification(receiveCharacteristic, true);
-        // BluetoothGattDescriptor receiveConfigDescriptor = new BluetoothGattDescriptor(UUID_CLIENT_CONFIGURATION, 0);
-        // // receiveConfigDescriptor.setValue(new byte[] { 1, 0 });
-        // receiveConfigDescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        // Log.d(TAG, receiveConfigDescriptor.getUuid().toString());
-        // Log.d(TAG, Integer.toString(receiveConfigDescriptor.getPermissions()));
-        // Log.d(TAG, Arrays.toString(receiveConfigDescriptor.getValue()));
-        // // D/ARViewer(15049): 00002902-0000-1000-8000-00805f9b34fb
-        // // D/ARViewer(15049): 0
-        // // D/ARViewer(15049): [1, 0]
-        // mBluetoothGatt.writeDescriptor(receiveConfigDescriptor);
-        //
-        // broadcastUpdate(ACTION_CONNECTED);
-
-
-
-
-
         return true;
     }
 
