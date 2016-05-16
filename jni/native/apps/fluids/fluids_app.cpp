@@ -9,6 +9,7 @@
 #include "isosurface.h"
 #include "slice.h"
 #include "rendering/cube.h"
+#include "rendering/rectangle.h"
 #include "tracking/multi_marker.h"
 #include "tracking/multi_marker_objects.h"
 #include "loaders/loader_obj.h"
@@ -141,6 +142,7 @@ struct FluidMechanics::Impl
 
 	Vector3 posToDataCoords(const Vector3& pos); // "pos" is in eye coordinates
 	Vector3 dataCoordsToPos(const Vector3& dataCoordsToPos);
+	Vector3 posToSliceCoords(const Vector3& pos);
 
 	Quaternion currentSliceRot ;
 	Vector3 currentSlicePos ;
@@ -152,8 +154,15 @@ struct FluidMechanics::Impl
 	Synchronized<std::vector<Vector3> > fingerPositions;
 	Synchronized<std::vector<Vector3> > prevFingerPositions ;
 	Synchronized<std::vector<std::vector<Vector3>>> movementPositions;
+	bool newData;
 	int lastFingerID;
 	Vector3 lastSelection[2];
+
+	std::vector<Quaternion> selectionRotMatrix; //All the quaternion rotation of the selection;
+	std::vector<Vector3> selectionTransMatrix; //All the Vector3 translation of the selection;
+	std::vector<Vector3> selectionLastPos; //All the last position during a selection;
+
+	Matrix4 tangibleMatrix; //Matrix used for tangible selection
 
 	Vector2 initialVector ;
 	Vector3 prevVec ;
@@ -225,7 +234,7 @@ struct FluidMechanics::Impl
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
- : currentSliceRot(Quaternion(Vector3::unitX(), M_PI)),
+ : currentSliceRot(Quaternion(Vector3::unitX(), 0)),
    currentSlicePos(Vector3::zero()),
    currentDataPos(Vector3::zero()),
    currentDataRot(Quaternion(Vector3::unitX(), M_PI)),
@@ -249,13 +258,15 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 
 	tangibleSelection.setColor(Vector3(1.0, 1.0, 0.0));
 	lastFingerID=-1;
+	newData = false;
+	tangibleMatrix = Matrix4::identity();
 }
 
 void FluidMechanics::Impl::reset(){
 	seedingPoint = Vector3(-1,-1,-1);
 	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
 	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
-	currentSlicePos = Vector3(0, 0, 400);
+	currentSlicePos = Vector3(0, 0, 0);
 	currentDataPos = Vector3(0,0,400);
 	buttonIsPressed = false ;
 
@@ -452,6 +463,22 @@ bool FluidMechanics::Impl::loadVelocityDataSet(const std::string& fileName)
 		throw std::runtime_error("Invalid velocity data: no vectors found");
 
 	return true;
+}
+
+Vector3 FluidMechanics::Impl::posToSliceCoords(const Vector3& pos)
+{
+	return (app->getProjMatrix()).inverse().transformPos(pos, true);
+/*  
+	synchronized(state->modelMatrix) {
+		// Transform "pos" into object space
+		result = state->modelMatrix.inverse() * pos;
+	}
+
+	// Compensate for the scale factor
+//	result *= 1/settings->zoomFactor;
+
+	return result;
+	*/
 }
 
 Vector3 FluidMechanics::Impl::posToDataCoords(const Vector3& pos)
@@ -880,6 +907,13 @@ void FluidMechanics::Impl::setMatrices(const Matrix4& volumeMatrix, const Matrix
 
 void FluidMechanics::Impl::setInteractionMode(int mode){
 	this->interactionMode = mode ;
+	//Reinit selection values
+	selectionRotMatrix.clear();
+	selectionTransMatrix.clear();
+	selectionLastPos.clear();
+
+	currentSlicePos = Vector3::zero();
+	currentSliceRot = Quaternion(Vector3::unitX(), 0);
 }
 
 void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, double rx, double ry, double rz, double q){
@@ -947,6 +981,8 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				}
 				
 				currentSlicePos += trans ; 	//Version with a fix plane
+				tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
+				newData = true;
 			}
 			else if( interactionMode == dataTangible || 
 				interactionMode == dataTouchTangible ||
@@ -987,12 +1023,14 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 			rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
 			rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), rx);
 			currentSliceRot = rot ;
+			tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
+			newData = true;
+
 		}
 		else if( interactionMode == dataTangible || 
 				interactionMode == dataTouchTangible ||
 				interactionMode == dataPlaneTangibleTouch)
 		{
-			
 			Quaternion rot = currentDataRot;
 			rot = rot * Quaternion(rot.inverse() * (-Vector3::unitZ()), rz);
 			rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
@@ -1064,7 +1102,7 @@ void FluidMechanics::Impl::onTranslateBar(float pos){
 }
 
 void FluidMechanics::Impl::computeFingerInteraction(){
-	Vector2 currentPos ;
+/*  Vector2 currentPos ;
 	Vector2 prevPos ;
 	if(fingerPositions.size() == 0){
 		return ;
@@ -1099,11 +1137,12 @@ void FluidMechanics::Impl::computeFingerInteraction(){
 			     interactionMode == planeTouchTangible ||
 			     interactionMode == dataPlaneTangibleTouch)
 		{
-					Quaternion rot = currentSliceRot;
+	  			Quaternion rot = currentSliceRot;
 					rot = rot * Quaternion(rot.inverse() * Vector3::unitZ(), 0);
 					rot = rot * Quaternion(rot.inverse() * Vector3::unitY(), -diff.x);
 					rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), diff.y);
 					currentSliceRot = rot;
+					
 		}
 	}
 
@@ -1151,11 +1190,12 @@ void FluidMechanics::Impl::computeFingerInteraction(){
 			interactionMode == planeTouchTangible ||
 			interactionMode == dataPlaneTangibleTouch)
 		{
-			//We just translate along the z axis of the plane
+  		//We just translate along the z axis of the plane
 			trans = Vector3(0,0,diff.x);		//Consider z vector only, on screen
 			trans = state->stylusModelMatrix.get3x3Matrix() * trans ;	//Transform to plane's Z vector
 			currentSlicePos +=trans ;
 			LOGD("PLane Interaction Translation");
+
 		}
 		else if(interactionMode == dataTouch || 
 			    interactionMode == dataTouchTangible ||
@@ -1188,12 +1228,13 @@ void FluidMechanics::Impl::computeFingerInteraction(){
 			interactionMode == planeTouchTangible ||
 			interactionMode == dataPlaneTouchTangible)
 	        {
-				Quaternion rot = currentSliceRot;
+  			Quaternion rot = currentSliceRot;
 				rot = rot * Quaternion(rot.inverse() * Vector3::unitZ(), angle);
 				rot = rot * Quaternion(rot.inverse() * Vector3::unitY(), 0);
 				rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), 0);
 				//currentSliceRot = rot ; //Version with the plane moving freely in the world
 				currentSliceRot = rot ;
+				
 			}
 			else if(interactionMode == dataTouch || 
 			    	interactionMode == dataTouchTangible ||
@@ -1226,7 +1267,7 @@ void FluidMechanics::Impl::computeFingerInteraction(){
 		initialVector = newVec ;
 
 	}
-	
+*/
 }
 
 void FluidMechanics::Impl::updateMatrices(){
@@ -1373,6 +1414,15 @@ void FluidMechanics::Impl::removeFinger(int fingerID){
 	if(position == -1){
 		return ;
 	}
+
+	if(getFingerPos(fingerID) == 0)
+	{
+		selectionRotMatrix.clear();
+		selectionTransMatrix.clear();
+		selectionLastPos.clear();
+		currentSlicePos = Vector3::zero();
+		currentSliceRot = Quaternion(Vector3::unitX(), 0);
+	}
 	//LOGD("Size = %d, position == %d", fingerPositions.size(), position);
 	synchronized(prevFingerPositions){
 		prevFingerPositions.erase(prevFingerPositions.begin()+position);
@@ -1415,6 +1465,7 @@ void FluidMechanics::Impl::updateFingerPositions(float x, float y, int fingerID)
 	synchronized(fingerPositions){
 		fingerPositions[position] = pos ;	
 	}
+
 	synchronized(movementPositions){
 		movementPositions[position].push_back(pos);
 	}
@@ -1621,7 +1672,8 @@ void FluidMechanics::Impl::renderObjects()
 	settings->showSlice = false;
 	updateMatrices();
 	//checkPosition();
-	const Matrix4 proj = app->getProjMatrix();
+
+	const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
@@ -1845,17 +1897,15 @@ void FluidMechanics::Impl::renderObjects()
 		}
 
 		//Render the rectangle selection
-		if(interactionMode==planeTouch)
+		if(interactionMode==planeTouch || interactionMode == planeTouchTangible)
 		{
 			synchronized(movementPositions)
 			{
 				int position = getFingerPos(lastFingerID);
 				if(position != -1 && movementPositions[position].size() >= 2)
 				{
-					Matrix4 rectangleMat = Matrix4(Matrix4::identity());
-					rectangleMat.setScale(2.0/screenW, 2.0/screenH, 1.0);
-
-					std::vector<Vector3> rectangleLines;
+					//Update all the selection
+					
 					Vector3 firstPos = movementPositions[position][0];
 					firstPos.y *= -1;
 					firstPos.y += screenH;
@@ -1867,9 +1917,21 @@ void FluidMechanics::Impl::renderObjects()
 					lastPos.y += screenH;
 					lastPos   -= Vector3(screenW/2.0, screenH/2.0, 0.0);
 					lastPos   *= Vector3(2.0/screenW, 2.0/screenH, 1.0);
-					Vector3 v  = lastPos - firstPos;
-					LOGE("GET V %f %f %f", lastPos.x, lastPos.y, lastPos.z);
 
+					Vector3 v  = posToSliceCoords(lastPos) - posToSliceCoords(firstPos);
+
+					//Add what is needed to show the selection
+					if(newData)
+					{
+						selectionRotMatrix.push_back(currentSliceRot);
+						selectionTransMatrix.push_back(currentSlicePos);
+						selectionLastPos.push_back(lastPos);
+						newData = false;
+					}
+
+					/*  
+					Matrix4 rectangleMat = Matrix4(Matrix4::identity());
+					rectangleMat.setScale(2.0/screenW, 2.0/screenH, 1.0);
 					rectangleLines.push_back(firstPos);
 					rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
 					rectangleLines.push_back(firstPos + Vector3(v.x, 0.0, 0.0));
@@ -1880,7 +1942,18 @@ void FluidMechanics::Impl::renderObjects()
 					rectangleLines.push_back(firstPos);
 					lines->setLines(rectangleLines);
 
-					lines->render(Matrix4::identity(), Matrix4::identity());
+					lines->render(, Matrix4::identity());
+					*/
+
+					Rectangle* r = new Rectangle(v.x, v.y);
+					r->render(app->getProjMatrix(), Matrix4(Matrix4::identity()).translate(posToSliceCoords(firstPos)));
+					delete r;
+
+/*  				for(uint32_t i=0; i < selectionRotMatrix.size(); i++)
+					{
+						selectionRect[i]->render(proj, Matrix4(Matrix4::identity()).translate(posToSliceCoords(firstPos)));//Matrix4::makeTransform(selectionTransMatrix[i] + posToSliceCoords(firstPos), selectionRotMatrix[i]));
+					}
+	*/
 				}
 			}
 		}
