@@ -76,6 +76,9 @@ extern "C" {
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_removeFinger(JNIEnv* env, jobject obj, jint fingerID);
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_reset(JNIEnv* env, jobject obj);
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env, jobject obj);
+
+	//Data to send via computer
+	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData(JNIEnv* env, jobject obj);
 }
 
 // (end of JNI interface)
@@ -1926,6 +1929,7 @@ void FluidMechanics::Impl::renderObjects()
 						selectionRotMatrix.push_back(currentSliceRot);
 						selectionTransMatrix.push_back(currentSlicePos);
 						selectionLastPos.push_back(lastPos);
+						LOGE("NEW DATA");
 						newData = false;
 					}
 
@@ -2336,6 +2340,28 @@ JNIEXPORT void Java_fr_limsi_ARViewer_FluidMechanics_removeFinger(JNIEnv* env, j
 	}
 }
 
+JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData(JNIEnv* env, jobject obj)
+{
+	try {
+
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		return env->NewStringUTF(instance->getSelectionData().c_str());
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+
+	return NULL;
+}
+
 JNIEXPORT void Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env, jobject obj){
 	try {
 
@@ -2357,7 +2383,7 @@ JNIEXPORT void Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env,
 
 FluidMechanics::FluidMechanics(const InitParams& params)
  : NativeApp(params, SettingsPtr(new FluidMechanics::Settings), StatePtr(new FluidMechanics::State)),
-   impl(new Impl(params.baseDir))
+   impl(new Impl(params.baseDir)), indiceSelection(0)
 {
 	impl->app = this;
 	impl->settings = std::static_pointer_cast<FluidMechanics::Settings>(settings);
@@ -2424,6 +2450,7 @@ void FluidMechanics::reset(){
 
 
 void FluidMechanics::setInteractionMode(int mode){
+	indiceSelection = 0;
 	impl->setInteractionMode(mode);
 }
 
@@ -2449,4 +2476,54 @@ void FluidMechanics::setTangoValues(double tx, double ty, double tz, double rx, 
 
 void FluidMechanics::setGyroValues(double rx, double ry, double rz, double q){
 	impl->setGyroValues(rx,ry,rz,q);
+}
+
+//get data to send via UDP
+std::string FluidMechanics::getSelectionData()
+{
+	if(impl->selectionRotMatrix.size() == 0)
+	{
+		indiceSelection = 0;
+		return "3";
+	}
+	if(impl->interactionMode != planeTouchTangible)
+		return "3";
+	//2 is for adding array
+	//3 is for cleaning the selection array
+	//The array is : "2;firstPoint;matrix;lastPoint;matrix;lastPoint;...;
+	
+	std::string data = "2;";
+	int position = impl->getFingerPos(impl->lastFingerID);
+	if(position != -1 && impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
+		return " ";
+
+	Vector3 firstPos = impl->movementPositions[position][0];
+	firstPos.y *= -1;
+	firstPos.y += impl->screenH;
+	firstPos -= Vector3(impl->screenW/2.0, impl->screenH/2.0, 0.0);
+	firstPos   *= Vector3(2.0/impl->screenW, 2.0/impl->screenH, 1.0);
+
+	char c[1024];
+	sprintf(c, "%f;%f;", firstPos.x, firstPos.y);
+	data += c;
+
+	uint32_t i;
+	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+10; i++)
+	{
+		Matrix4 m = Matrix4::makeTransform(impl->selectionTransMatrix[i], impl->selectionRotMatrix[i]);
+		const float* mData = m.data_;
+		for(uint32_t j=0; j < 16; j++)
+		{
+			sprintf(c, "%f", mData[j]);
+			data += c;
+		    data += ";";
+		}
+
+		sprintf(c, "%f;%f;", impl->selectionLastPos[i].x, impl->selectionLastPos[i].y);
+		data += c;
+	}
+	indiceSelection = i;
+	LOGE("%s", data.c_str());
+	LOGE("%d", indiceSelection);
+	return data;
 }

@@ -17,9 +17,10 @@ public class Client extends AsyncTask<String, String, String>{
 
 
 	//protected String hostName = "192.168.1.41" ;       //Home computer
-    protected String hostName = "192.168.0.133" ;        //Aviz computer
+    //protected String hostName = "192.168.0.133" ;        //Aviz computer
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
     //protected String hostName="10.0.0.1";               //Local
+	protected String hostName = "192.168.1.95";           //Mickael Computer
     protected int portNumber = 8500;
     //protected Socket clientSocket ;
     protected DatagramSocket clientSocket ;
@@ -29,6 +30,8 @@ public class Client extends AsyncTask<String, String, String>{
     protected boolean closeConnection = false ;
     protected boolean valuesupdated = false ;
     protected boolean firstConnection = true ;
+	protected boolean selectUpdated = false;
+
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
     protected short considerY = 1 ;
@@ -39,12 +42,13 @@ public class Client extends AsyncTask<String, String, String>{
     protected String seedPoint = "-1000000.0;-1000000.0;-1000000.0";
                                     //Dataset+showVolume+showSurface+showStylus+showSlice+showOutline+Matrix
     protected String dataToSend = "1;1;1;1;1;1;1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1;1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1;-1;-1;-1;" ;
+	protected String selectData;
     protected String msg ;
     protected int dataset = 1 ;
 
     private long mLastTimestamp = 0;
     private long currentTimestamp = 1000000 ;
-    private long refresh = 60;
+    private long refresh = 10;
     protected int counterTries = 0 ;
 
     protected boolean initDone = false ;
@@ -107,29 +111,53 @@ public class Client extends AsyncTask<String, String, String>{
         while(closeConnection == false) {
             currentTimestamp = System.currentTimeMillis() ;
             long diff = currentTimestamp - mLastTimestamp ;
+
             //Log.d("Connected == ", "Connected = "+initDone);
-            if (connected == true && initDone == true && valuesupdated == true && diff >= refresh || firstConnection){
+            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true) && diff >= refresh){
             	//msg = ""+MATRIXCHANGED+";"+interactionMode+";"+mapperSelected+";"+matrix+PositionAndOrientation+this.seedPoint ;
-                msg = ""+dataset+";"+dataToSend+considerX+";"+considerY+";"+considerZ+";";
-                byte[] data = msg.getBytes();
-                DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
-                counterTries = 0 ;
-                //Log.d("Diff", "Diff = "+diff);
-                do {
-                    try {
-                        clientSocket.send(dp);
-                        Log.d("MessageSent", ""+msg);
-                        break ;
-                    }catch (Exception e) {
-                        Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
-                        counterTries ++ ;
-                    }
-                }while(counterTries < 4);
+				if(valuesupdated || firstConnection)
+				{
+					msg = ""+dataset+";"+dataToSend+considerX+";"+considerY+";"+considerZ+";";
+					byte[] data = msg.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					//Log.d("Diff", "Diff = "+diff);
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
 
+					this.valuesupdated = false ;
+					firstConnection = false ;
+				}
 
-                mLastTimestamp = currentTimestamp ;
-                this.valuesupdated = false ;
-                firstConnection = false ;
+				//Send slice Matrix array
+				//Send firstPosition
+				//Send lastPosition array
+				else if(selectUpdated)
+				{
+					byte[] data = selectData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+				}
+
+				mLastTimestamp = currentTimestamp ;
             }
         }
 
@@ -156,6 +184,11 @@ public class Client extends AsyncTask<String, String, String>{
         initDone = true ;
     }
 
+	protected void setSelectionData(String s){
+		this.selectData = s;
+		this.selectUpdated = true;
+	}
+
     protected void setSliceMatrixString(String s){
     	this.sliceMatrix = s ;
     	this.valuesupdated = true ;
@@ -169,7 +202,3 @@ public class Client extends AsyncTask<String, String, String>{
     }
 
 }
-
-
-
-

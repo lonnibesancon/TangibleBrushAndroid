@@ -52,4 +52,7 @@ public class FluidMechanics {
     public static native void reset();
     public static native void resetParticles();
     public static native void getState(FluidMechanics.State state);
+
+	//Get data to send to the computer
+	public static native String getSelectionData();
 }

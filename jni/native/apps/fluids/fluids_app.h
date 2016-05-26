@@ -28,6 +28,7 @@ public:
 	void resetParticles();
 
     std::string getData();
+	std::string getSelectionData();
 
     //Called after SetSettings (JNI)
 	void updateSurfacePreview();
@@ -48,6 +49,8 @@ private:
 
 	struct Impl;
 	std::unique_ptr<Impl> impl;
+
+	int indiceSelection;
 };
 
 // ======================================================================
