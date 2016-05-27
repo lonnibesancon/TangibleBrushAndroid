@@ -48,7 +48,7 @@ public class Client extends AsyncTask<String, String, String>{
 
     private long mLastTimestamp = 0;
     private long currentTimestamp = 1000000 ;
-    private long refresh = 10;
+    private long refresh = 1;
     protected int counterTries = 0 ;
 
     protected boolean initDone = false ;
@@ -113,7 +113,7 @@ public class Client extends AsyncTask<String, String, String>{
             long diff = currentTimestamp - mLastTimestamp ;
 
             //Log.d("Connected == ", "Connected = "+initDone);
-            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true) && diff >= refresh){
+            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true)){
             	//msg = ""+MATRIXCHANGED+";"+interactionMode+";"+mapperSelected+";"+matrix+PositionAndOrientation+this.seedPoint ;
 				if(valuesupdated || firstConnection)
 				{
@@ -155,8 +155,8 @@ public class Client extends AsyncTask<String, String, String>{
 							counterTries ++ ;
 						}
 					}while(counterTries < 4);
+					selectUpdated = false;
 				}
-
 				mLastTimestamp = currentTimestamp ;
             }
         }

@@ -2481,22 +2481,17 @@ void FluidMechanics::setGyroValues(double rx, double ry, double rz, double q){
 //get data to send via UDP
 std::string FluidMechanics::getSelectionData()
 {
-	if(impl->selectionRotMatrix.size() == 0)
-	{
-		indiceSelection = 0;
-		return "3";
-	}
 	if(impl->interactionMode != planeTouchTangible)
 		return "3";
 	//2 is for adding array
 	//3 is for cleaning the selection array
 	//The array is : "2;firstPoint;matrix;lastPoint;matrix;lastPoint;...;
 	
-	std::string data = "2;";
 	int position = impl->getFingerPos(impl->lastFingerID);
 	if(position != -1 && impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
 		return " ";
 
+	std::string data = "2;";
 	Vector3 firstPos = impl->movementPositions[position][0];
 	firstPos.y *= -1;
 	firstPos.y += impl->screenH;
@@ -2504,26 +2499,24 @@ std::string FluidMechanics::getSelectionData()
 	firstPos   *= Vector3(2.0/impl->screenW, 2.0/impl->screenH, 1.0);
 
 	char c[1024];
-	sprintf(c, "%f;%f;", firstPos.x, firstPos.y);
+	sprintf(c, "%.2f;%.2f;", firstPos.x, firstPos.y);
 	data += c;
 
 	uint32_t i;
-	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+10; i++)
+	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
 		Matrix4 m = Matrix4::makeTransform(impl->selectionTransMatrix[i], impl->selectionRotMatrix[i]);
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{
-			sprintf(c, "%f", mData[j]);
+			sprintf(c, "%.2f", mData[j]);
 			data += c;
 		    data += ";";
 		}
 
-		sprintf(c, "%f;%f;", impl->selectionLastPos[i].x, impl->selectionLastPos[i].y);
+		sprintf(c, "%.2f;%.2f;", impl->selectionLastPos[i].x, impl->selectionLastPos[i].y);
 		data += c;
 	}
 	indiceSelection = i;
-	LOGE("%s", data.c_str());
-	LOGE("%d", indiceSelection);
 	return data;
 }
