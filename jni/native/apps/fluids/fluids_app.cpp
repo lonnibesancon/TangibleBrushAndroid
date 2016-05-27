@@ -2488,7 +2488,7 @@ std::string FluidMechanics::getSelectionData()
 	//The array is : "2;firstPoint;matrix;lastPoint;matrix;lastPoint;...;
 	
 	int position = impl->getFingerPos(impl->lastFingerID);
-	if(position != -1 && impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
+	if(position == -1 || impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
 		return " ";
 
 	std::string data = "2;";

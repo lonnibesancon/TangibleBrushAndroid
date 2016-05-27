@@ -137,10 +137,8 @@ public class Client extends AsyncTask<String, String, String>{
 					firstConnection = false ;
 				}
 
-				//Send slice Matrix array
-				//Send firstPosition
-				//Send lastPosition array
-				else if(selectUpdated)
+				//Send the data for the selection
+				if(selectUpdated)
 				{
 					byte[] data = selectData.getBytes();
 					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
