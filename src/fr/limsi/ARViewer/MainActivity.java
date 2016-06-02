@@ -1685,8 +1685,11 @@ public class MainActivity extends BaseARActivity
    public void requestRender(){
         if (mView != null){
             //Log.d(TAG,"RequestRender");
-            client.setData(FluidMechanics.getData());
-			client.setSelectionData(FluidMechanics.getSelectionData());
+			String s = FluidMechanics.getSelectionData();
+			if(s.charAt(0) == '2' || s.charAt(0) == '3')
+				client.setSelectionData(s);
+			else
+				client.setData(FluidMechanics.getData());
             mView.requestRender();
         }
    } 

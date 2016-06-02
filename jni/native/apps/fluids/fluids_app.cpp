@@ -1414,9 +1414,8 @@ void FluidMechanics::Impl::addFinger(float x, float y, int fingerID){
 void FluidMechanics::Impl::removeFinger(int fingerID){
 	lastFingerID=-1;
 	int position = getFingerPos(fingerID);
-	if(position == -1){
-		return ;
-	}
+	if(position == -1)
+		return;
 
 	if(getFingerPos(fingerID) == 0)
 	{
@@ -2491,21 +2490,24 @@ std::string FluidMechanics::getSelectionData()
 	if(position == -1 || impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
 		return " ";
 
+	Matrix4 inv = getProjMatrix().inverse();
+
 	std::string data = "2;";
 	Vector3 firstPos = impl->movementPositions[position][0];
 	firstPos.y *= -1;
 	firstPos.y += impl->screenH;
 	firstPos -= Vector3(impl->screenW/2.0, impl->screenH/2.0, 0.0);
 	firstPos   *= Vector3(2.0/impl->screenW, 2.0/impl->screenH, 1.0);
+	firstPos.z = 0.0f;
 
 	char c[1024];
-	sprintf(c, "%.2f;%.2f;", firstPos.x, firstPos.y);
+	sprintf(c, "%.2f;%.2f;%.2f;", firstPos.x, firstPos.y, firstPos.z);
 	data += c;
 
 	int i;
 	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
-		Matrix4 m = Matrix4::makeTransform(getProjMatrix().inverse() * firstPos - impl->selectionTransMatrix[i], impl->selectionRotMatrix[i]);
+		Matrix4 m = Matrix4::makeTransform(firstPos + impl->selectionTransMatrix[i], impl->selectionRotMatrix[i])*inv;
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{
@@ -2514,7 +2516,8 @@ std::string FluidMechanics::getSelectionData()
 		    data += ";";
 		}
 
-		sprintf(c, "%.2f;%.2f;", impl->selectionLastPos[i].x, impl->selectionLastPos[i].y);
+		Vector3 lastPos = Vector3(impl->selectionLastPos[i].x, impl->selectionLastPos[i].y, 0.0);
+		sprintf(c, "%.2f;%.2f;%.2f;", lastPos.x, lastPos.y, lastPos.z);
 		data += c;
 	}
 	if(i==indiceSelection)
