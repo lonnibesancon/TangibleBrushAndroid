@@ -2507,7 +2507,7 @@ std::string FluidMechanics::getSelectionData()
 	int i;
 	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
-		Matrix4 m = Matrix4::makeTransform(firstPos + impl->selectionTransMatrix[i], impl->selectionRotMatrix[i])*inv;
+		Matrix4 m = Matrix4::makeTransform(-impl->selectionTransMatrix[i], impl->selectionRotMatrix[i])*inv;
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{
