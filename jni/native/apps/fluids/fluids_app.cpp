@@ -1925,10 +1925,9 @@ void FluidMechanics::Impl::renderObjects()
 					//Add what is needed to show the selection
 					if(newData)
 					{
-						selectionRotMatrix.push_back(-currentSliceRot);
-						selectionTransMatrix.push_back(-currentSlicePos);
+						selectionRotMatrix.push_back(currentSliceRot);
+						selectionTransMatrix.push_back(currentSlicePos);
 						selectionLastPos.push_back(lastPos);
-						LOGE("NEW DATA");
 						newData = false;
 					}
 
@@ -2507,7 +2506,7 @@ std::string FluidMechanics::getSelectionData()
 	int i;
 	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
-		Matrix4 m = Matrix4::makeTransform(-impl->selectionTransMatrix[i], impl->selectionRotMatrix[i])*inv;
+		Matrix4 m = getProjMatrix() * Matrix4::makeTransform(-impl->selectionTransMatrix[i], -impl->selectionRotMatrix[i]);
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{
