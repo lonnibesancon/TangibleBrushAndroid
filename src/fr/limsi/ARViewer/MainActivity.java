@@ -109,9 +109,12 @@ public class MainActivity extends BaseARActivity
     private ToggleButton dataORplaneTouchToggle ;
     private ToggleButton tangibleToggle ;
     private ToggleButton touchToggle ;
+    private ToggleButton selectionToggle ;
+    private ToggleButton constrainToggle ;
+    private Button resetBtn ;
 
-    private boolean isTangibleOn = false ;
-    private boolean isTouchOn = false;
+    private boolean isTangibleOn = true ;
+    private boolean isTouchOn = true ;
     private boolean dataORplaneTangible = true ; //Data
     private boolean dataORplaneTouch = true ;    //Data
     private boolean isTangiblePressed = false ;
@@ -278,6 +281,9 @@ public class MainActivity extends BaseARActivity
         FluidMechanics.getState(fluidState);
         fluidSettings.precision = 1 ;
         fluidSettings.translatePlane = false ;
+        interactionMode = dataTouchTangible ;
+        isTangibleOn = true ;
+        isTouchOn = true ;
         //fluidSettings.dataORplane = 0 ; //Data 
 
         this.client = new Client();
@@ -356,7 +362,7 @@ public class MainActivity extends BaseARActivity
         //this.sliceBtn.setOnClickListener(this);
         //this.tangibleBtn.setOnTouchListener(this);
 
-        this.constrainXBtn = (Button) findViewById(R.id.constrainX);
+        /*this.constrainXBtn = (Button) findViewById(R.id.constrainX);
         //this.constrainXBtn.setOnClickListener(this);
         this.constrainXBtn.setOnTouchListener(this);
 
@@ -370,13 +376,16 @@ public class MainActivity extends BaseARActivity
 
         this.autoConstrainBtn = (Button) findViewById(R.id.autoConstrain);
         //this.autoConstrainBtn.setOnClickListener(this);
-        this.autoConstrainBtn.setOnTouchListener(this);
+        this.autoConstrainBtn.setOnTouchListener(this);*/
+
+        resetBtn = (Button) findViewById(R.id.resetBtn);
+        this.resetBtn.setOnClickListener(this);
 
         this.seedingBtn = (Button) findViewById(R.id.seedingBtn);
         this.seedingBtn.setOnTouchListener(this);
 
 
-        touchToggle = (ToggleButton) findViewById(R.id.touchToggle);
+        /*touchToggle = (ToggleButton) findViewById(R.id.touchToggle);
         touchToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 
@@ -390,40 +399,38 @@ public class MainActivity extends BaseARActivity
                 setInteractionMode();
             }
 
-        });
+        });*/
 
 
-        tangibleToggle = (ToggleButton) findViewById(R.id.tangibleToggle);
-        tangibleToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        selectionToggle = (ToggleButton) findViewById(R.id.selectionToggle);
+        selectionToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    isTangibleOn = true ;
-                    dataORplaneTangibleToggle.setEnabled(true);
+                    interactionMode = dataTouchTangible ;
                 } else {
-                    isTangibleOn = false ;
-                    dataORplaneTangibleToggle.setEnabled(false);
+                    interactionMode = planeTouchTangible ;
                 }
-                setInteractionMode();
+                //setInteractionMode();
+                FluidMechanics.setInteractionMode(interactionMode);
             }
 
         });
 
-        dataORplaneTangibleToggle = (ToggleButton) findViewById(R.id.dataORplaneTangible);
-        dataORplaneTangibleToggle.setChecked(true);
-        dataORplaneTangibleToggle.setEnabled(false);
-        dataORplaneTangibleToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        constrainToggle = (ToggleButton) findViewById(R.id.constrainToggle);
+        constrainToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    dataORplaneTangible = true ;
+                    fluidSettings.constrainSelection = true ;
                 } else {
-                    dataORplaneTangible = false ;
+                    fluidSettings.constrainSelection = false ;
                 }
-                setInteractionMode();
+                
+                updateSettings();
             }
 
         });
 
-        dataORplaneTouchToggle = (ToggleButton) findViewById(R.id.dataORplaneTouch);
+        /*dataORplaneTouchToggle = (ToggleButton) findViewById(R.id.dataORplaneTouch);
         dataORplaneTouchToggle.setChecked(true);
         dataORplaneTouchToggle.setEnabled(false);
         dataORplaneTouchToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -474,8 +481,8 @@ public class MainActivity extends BaseARActivity
         
     }
 
-    private void setInteractionMode(){
-        if(isTangibleOn == false){
+    //private void setInteractionMode(){
+        /*if(isTangibleOn == false){
             if(isTouchOn == false){
                 interactionMode = nothing ;
                 //fluidSettings.interactionMode = nothing ;
@@ -508,8 +515,8 @@ public class MainActivity extends BaseARActivity
                     //fluidSettings.interactionMode = dataTangible ;
                 }
             }
-            else{
-                if(dataORplaneTangible == false && dataORplaneTouch == false){
+            else{*/
+                /*if(dataORplaneTangible == false && dataORplaneTouch == false){
                     interactionMode = planeTouchTangible ;
                     Log.d(TAG,"planeTouchTangible");
                     //fluidSettings.interactionMode = planeTouchTangible ;
@@ -528,12 +535,12 @@ public class MainActivity extends BaseARActivity
                     interactionMode = dataPlaneTangibleTouch ;
                     Log.d(TAG,"dataPlaneTangibleTouch");
                     //fluidSettings.interactionMode = dataPlaneTangibleTouch ;
-                }
-            }
-        }
+                }*/
+            //}
+        //}
 
-        FluidMechanics.setInteractionMode(interactionMode);
-    }
+        //FluidMechanics.setInteractionMode(interactionMode);
+    //}
 
 
     protected void loggingFunction()throws IOException{
@@ -874,6 +881,7 @@ public class MainActivity extends BaseARActivity
         settings.zoomFactor = fluidState.computedZoomFactor * 0.75f;
         fluidSettings.showSlice = false ;
         fluidSettings.sliceType = FluidMechanics.SLICE_STYLUS ;
+        fluidSettings.constrainSelection = false ;
         updateSettings();
         mDatasetLoaded = true;
         requestRender();
@@ -1251,7 +1259,7 @@ public class MainActivity extends BaseARActivity
 
     private void reset(){
         FluidMechanics.reset();
-        
+        isTouchOn = true ;
         //fluidSettings.dataORplane = 0 ; //Data 
         
         this.interactionMode = nothing ;
@@ -1261,11 +1269,12 @@ public class MainActivity extends BaseARActivity
         this.dataORplaneTouchToggle.setChecked(true);
 
 
-        isTangibleOn = false ;
-        isTouchOn = false;
+        isTangibleOn = true ;
+        interactionMode = dataTouchTangible ;
         dataORplaneTangible = true ; //Data
         dataORplaneTouch = true ;    //Data
         fluidSettings.precision = 1 ;
+        fluidSettings.constrainSelection = false ;
 
         this.nbOfResets += 1 ;
         updateDataSettings();
@@ -1439,8 +1448,8 @@ public class MainActivity extends BaseARActivity
 
     private boolean isButton(View v){
         int id = v.getId();
-        if(id == R.id.tangibleBtn || id == R.id.constrainX ||
-           id == R.id.constrainY || id == R.id.constrainZ || id == R.id.autoConstrain){
+        if(id == R.id.tangibleBtn /*|| id == R.id.constrainX ||
+           id == R.id.constrainY || id == R.id.constrainZ || id == R.id.autoConstrain*/){
 
                 return true ;
         }
@@ -1499,7 +1508,7 @@ public class MainActivity extends BaseARActivity
             //return true ;
         }
 
-        else if(v.getId() == R.id.constrainX){
+        /*else if(v.getId() == R.id.constrainX){
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
                 constrainX = true ;
                 this.constrainXBtn.setPressed(true);
@@ -1569,7 +1578,7 @@ public class MainActivity extends BaseARActivity
             updateConstraintAuto();
             int index = event.getActionIndex();
             //return true ;
-        }
+        }*/
 
         else if(v.getId() == R.id.seedingBtn){
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
@@ -1708,6 +1717,10 @@ public class MainActivity extends BaseARActivity
 
     @Override
     public void onClick(View v) {
+        if(v.getId() == R.id.resetBtn){
+            fluidSettings.reset = true ;
+            updateSettings();
+        }
     }
 
     //Bluetooth
@@ -1814,7 +1827,7 @@ public class MainActivity extends BaseARActivity
     private void updateState(int newState) {
         state = newState;
         Log.d(TAG,"STATE updated");
-        switch (newState){
+        /*switch (newState){
             case STATE_BLUETOOTH_OFF:
                 bluetoothState.setText("STATE_BLUETOOTH_OFF");
                 break ;
@@ -1827,7 +1840,7 @@ public class MainActivity extends BaseARActivity
             case STATE_CONNECTED:
                 bluetoothState.setText("STATE_CONNECTED");
                 break ;
-        }
+        }*/
         updateConnectionProcess();
         
     }

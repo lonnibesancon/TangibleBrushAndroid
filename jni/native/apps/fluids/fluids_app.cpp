@@ -1900,6 +1900,7 @@ void FluidMechanics::Impl::renderObjects()
 
 		//Render the rectangle selection
 		if(interactionMode==planeTouch || interactionMode == planeTouchTangible)
+		//if(1)
 		{
 			synchronized(movementPositions)
 			{

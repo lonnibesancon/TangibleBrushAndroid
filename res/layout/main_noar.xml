@@ -149,47 +149,46 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:columnCount="2"
-                  android:rowCount="2"
+                  android:rowCount="1"
                   android:orientation="horizontal"
                   android:layout_alignParentRight="true"
                   android:layout_gravity="bottom|left"
                   tools:context=".GridXMLActivity" >
                   <!--android:background="@drawable/custom_border"-->
-                  <ToggleButton
+                  <!--<ToggleButton
                       android:id="@+id/tangibleToggle"
                       android:layout_gravity="left|bottom"
                       android:layout_height="60dp"
                       android:layout_width="120dp"
                       android:layout_alignParentRight="true"
                       android:textOn="Tangible On"
-                      android:textOff="Tangible Off" />
+                      android:textOff="Tangible Off" />-->
 
                   <ToggleButton
-                      android:id="@+id/touchToggle"
-                      android:layout_gravity="left|bottom"
-                      android:layout_height="60dp"
-                      android:layout_width="120dp"
-                      android:layout_alignParentRight="true"
-                      android:textOn="Tactile On"
-                      android:textOff="Tactile Off" />
-
-                  <ToggleButton
-                      android:id="@+id/dataORplaneTangible"
-                      android:layout_gravity="left|bottom"
-                      android:layout_height="60dp"
-                      android:layout_width="120dp"
-                      android:layout_alignParentRight="true"
-                      android:textOn="Data"
-                      android:textOff="Plane" />
-                  
-                  <ToggleButton
-                      android:id="@+id/dataORplaneTouch"
+                      android:id="@+id/selectionToggle"
                       android:layout_gravity="left|bottom"
                       android:layout_height="60dp"
                       android:layout_width="120dp"
                       android:layout_alignParentRight="true"
                       android:textOn="Data"
                       android:textOff="Selection" />  
+
+                  <Button
+                          android:id="@+id/resetBtn"
+                          android:layout_gravity="right|bottom"
+                          android:layout_height="60dp"
+                          android:layout_width="100dp"
+                          android:layout_alignParentRight="true"
+                          android:text="Reset" />
+                  
+                  <!--<ToggleButton
+                      android:id="@+id/dataORplaneTouch"
+                      android:layout_gravity="left|bottom"
+                      android:layout_height="60dp"
+                      android:layout_width="120dp"
+                      android:layout_alignParentRight="true"
+                      android:textOn="Data"
+                      android:textOff="Selection" />-->  
               </GridLayout>
         
        <!--<Button
@@ -265,8 +264,16 @@
             android:id= "@+id/linearlayout5"
              >
 
+                   <ToggleButton
+                      android:id="@+id/constrainToggle"
+                      android:layout_gravity="left|bottom"
+                      android:layout_height="60dp"
+                      android:layout_width="120dp"
+                      android:layout_alignParentRight="true"
+                      android:textOn="Constrained"
+                      android:textOff="Unconstrained" />  
 
-                   <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                   <!--<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
                       xmlns:tools="http://schemas.android.com/tools"
                       android:id="@+id/GridLayout1"
                       android:layout_width="match_parent"
@@ -308,7 +315,7 @@
                           android:layout_width="100dp"
                           android:layout_alignParentRight="true"
                           android:text="Auto" />   
-                  </GridLayout>
+                  </GridLayout>-->
 
           </LinearLayout>
          <!--
