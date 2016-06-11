@@ -420,6 +420,7 @@ public class MainActivity extends BaseARActivity
         constrainToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+					Log.e("Main", "isChecked");
                     fluidSettings.constrainSelection = true ;
                 } else {
                     fluidSettings.constrainSelection = false ;

@@ -985,7 +985,6 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				
 				if(settings->constrainSelection)
 				{
-					LOGE("OKKK");
 					Vector3 t(1, 0, 0);
 					t = currentSliceRot * t;
 					t *= (t.dot(trans));
@@ -1694,7 +1693,7 @@ void FluidMechanics::Impl::renderObjects()
 	glDepthMask(true); // requires "discard" in the shader where alpha == 0
 
 	if(settings->constrainSelection)
-		LOGE("COUNSTRAIN");
+		LOGE("CONSTRAIN");
 
 	 if (settings->clipDist > 0.0f) {
 		// Set a depth value for the slicing plane
