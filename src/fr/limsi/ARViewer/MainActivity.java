@@ -281,7 +281,7 @@ public class MainActivity extends BaseARActivity
         FluidMechanics.getState(fluidState);
         fluidSettings.precision = 1 ;
         fluidSettings.translatePlane = false ;
-        interactionMode = dataTouchTangible ;
+        interactionMode = planeTouchTangible ;
         isTangibleOn = true ;
         isTouchOn = true ;
         //fluidSettings.dataORplane = 0 ; //Data 
@@ -424,7 +424,6 @@ public class MainActivity extends BaseARActivity
                 } else {
                     fluidSettings.constrainSelection = false ;
                 }
-                
                 updateSettings();
             }
 

@@ -952,7 +952,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 			printAny(sliceNormal,"SliceNormal = ");
 			printAny(trans,"Trans = ");
-			currentSlicePos += trans ;
+			currentSlicePos += trans ; 	//Version with a fix plane
 			//LOGD("D = %f  --  L = %f",d,l);
 			printAny(trans, "Trans: ");
 		}
@@ -983,7 +983,16 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 					printAny(trans, "TRANS = ");
 				}
 				
-				currentSlicePos += trans ; 	//Version with a fix plane
+				if(settings->constrainSelection)
+				{
+					LOGE("OKKK");
+					Vector3 t(1, 0, 0);
+					t = currentSliceRot * t;
+					t *= (t.dot(trans));
+					currentSlicePos += t;				
+				}
+				else
+					currentSlicePos += trans ;
 				tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
 				newData = true;
 			}
@@ -1025,7 +1034,8 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 			rot = rot * Quaternion(rot.inverse() * (-Vector3::unitZ()), rz);
 			rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
 			rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), rx);
-			currentSliceRot = rot ;
+			if(!settings->constrainSelection)
+				currentSliceRot = rot ;
 			tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
 			newData = true;
 
@@ -1682,6 +1692,9 @@ void FluidMechanics::Impl::renderObjects()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_CULL_FACE);
 	glDepthMask(true); // requires "discard" in the shader where alpha == 0
+
+	if(settings->constrainSelection)
+		LOGE("COUNSTRAIN");
 
 	 if (settings->clipDist > 0.0f) {
 		// Set a depth value for the slicing plane
