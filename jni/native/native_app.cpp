@@ -57,7 +57,8 @@ void NativeApp::init(const InitParams& params)
 	screenHeight = 0;
 
 	// Create an orthographic projection matrix
-	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, +1.0f);
+	orthoProjMatrix = Matrix4::identity();
 	// const float aspect = (float)videoWidth/videoHeight;
 	// orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1/aspect, 1/aspect, 1.0f, -1.0f);
 }

@@ -425,9 +425,8 @@ public class MainActivity extends BaseARActivity
                 } else {
                     fluidSettings.constrainSelection = false ;
                 }
-                updateSettings();
+				FluidMechanics.setConstrainSelection(fluidSettings.constrainSelection);
             }
-
         });
 
         /*dataORplaneTouchToggle = (ToggleButton) findViewById(R.id.dataORplaneTouch);
@@ -1263,10 +1262,10 @@ public class MainActivity extends BaseARActivity
         //fluidSettings.dataORplane = 0 ; //Data 
         
         this.interactionMode = nothing ;
-        this.tangibleToggle.setChecked(false);
-        this.touchToggle.setChecked(false);
-        this.dataORplaneTangibleToggle.setChecked(true);
-        this.dataORplaneTouchToggle.setChecked(true);
+        //this.tangibleToggle.setChecked(false);
+        //this.touchToggle.setChecked(false);
+        //this.dataORplaneTangibleToggle.setChecked(true);
+        //this.dataORplaneTouchToggle.setChecked(true);
 
 
         isTangibleOn = true ;
@@ -1720,6 +1719,8 @@ public class MainActivity extends BaseARActivity
         if(v.getId() == R.id.resetBtn){
             fluidSettings.reset = true ;
             updateSettings();
+			client.setSelectionData("3");
+			FluidMechanics.reset();
         }
     }
 

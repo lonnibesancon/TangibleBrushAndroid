@@ -818,7 +818,7 @@ struct Matrix4
 
 		android_assert(left != right);
 		android_assert(top != bottom);
-		// android_assert(near < far);
+		android_assert(near < far);
 
 		result[0][0] =  2 / (right-left);
 		result[1][1] =  2 / (top-bottom);

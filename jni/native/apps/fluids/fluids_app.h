@@ -138,6 +138,7 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 
 	void write(JNIEnv* env, jobject obj, jclass cls)
 	{
+		LOGE("WRITE IS CALLED");
 		GET_JNI_FIELD(obj, showVolume, Boolean, "Z", showVolume);
 		GET_JNI_FIELD(obj, showSurface, Boolean, "Z", showSurface);
 		GET_JNI_FIELD(obj, showStylus, Boolean, "Z", showStylus);

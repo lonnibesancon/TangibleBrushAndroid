@@ -391,6 +391,6 @@
       android:gravity="center"
       android:background="#AA000000"
       android:textSize="25dp"
-      android:text="test"
+      android:text=""
   />
 </FrameLayout>

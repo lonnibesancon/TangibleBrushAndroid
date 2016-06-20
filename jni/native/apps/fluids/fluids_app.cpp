@@ -53,6 +53,7 @@
 // JNI interface
 
 extern "C" {
+	JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_setConstrainSelection(JNIEnv* env, jclass cls, jboolean b);
 	JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadDataset(JNIEnv* env, jobject obj, jstring filename);
 	JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadVelocityDataset(JNIEnv* env, jobject obj, jstring filename);
 
@@ -142,6 +143,7 @@ struct FluidMechanics::Impl
 	void onTranslateBar(float pos);
 	bool checkPosition();
 	void resetParticles();
+
 
 	Vector3 posToDataCoords(const Vector3& pos); // "pos" is in eye coordinates
 	Vector3 dataCoordsToPos(const Vector3& dataCoordsToPos);
@@ -267,6 +269,7 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 
 void FluidMechanics::Impl::reset(){
 	seedingPoint = Vector3(-1,-1,-1);
+	/*
 	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
 	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
 	currentSlicePos = Vector3(0, 0, 0);
@@ -277,7 +280,11 @@ void FluidMechanics::Impl::reset(){
 		p.valid = false;
 
 	setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),Matrix4::makeTransform(Vector3(0, 0, 400)));
+	*/
 	
+	selectionRotMatrix.clear();
+	selectionTransMatrix.clear();
+	movementPositions.clear();
 }
 
 bool FluidMechanics::Impl::checkPosition(){
@@ -927,7 +934,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 	Vector3 vec(tx,ty,tz);
 
 	if(tangoEnabled){
-		//LOGD("Tango Enabled");
+		LOGE("Tango Enabled");
 		Quaternion quat(rx,ry,rz,q);
 
 		//LOGD("autoConstraint == %d",settings->autoConstraint);
@@ -952,7 +959,6 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 			printAny(sliceNormal,"SliceNormal = ");
 			printAny(trans,"Trans = ");
-			currentSlicePos += trans ; 	//Version with a fix plane
 			//LOGD("D = %f  --  L = %f",d,l);
 			printAny(trans, "Trans: ");
 		}
@@ -985,13 +991,15 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				
 				if(settings->constrainSelection)
 				{
-					Vector3 t(1, 0, 0);
+					LOGE("CONSTRAIN SELECTION");
+					Vector3 t(0, 0, 1);
 					t = currentSliceRot * t;
 					t *= (t.dot(trans));
 					currentSlicePos += t;				
 				}
 				else
 					currentSlicePos += trans ;
+
 				tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
 				newData = true;
 			}
@@ -1684,7 +1692,8 @@ void FluidMechanics::Impl::renderObjects()
 	updateMatrices();
 	//checkPosition();
 
-	const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
+	//const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
+	const Matrix4 proj = app->getOrthoProjMatrix() * tangibleMatrix;
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
@@ -2109,6 +2118,7 @@ JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_setSettings(JNIEnv*
 {
 	try {
 		// LOGD("(JNI) [FluidMechanics] setSettings()");
+		LOGE("SET SETTINGS CALLED");
 
 		if (!settingsObj)
 			throw std::runtime_error("\"Settings\" object is null");
@@ -2373,6 +2383,13 @@ JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData
 	return NULL;
 }
 
+JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_setConstrainSelection(JNIEnv* env, jclass cls, jboolean b)
+{
+	FluidMechanics::Settings* settings = dynamic_cast<FluidMechanics::Settings*>(App::getInstance()->getSettings().get());
+	android_assert(settings);
+	settings->constrainSelection = b;
+}
+
 JNIEXPORT void Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env, jobject obj){
 	try {
 
@@ -2492,8 +2509,8 @@ void FluidMechanics::setGyroValues(double rx, double ry, double rz, double q){
 //get data to send via UDP
 std::string FluidMechanics::getSelectionData()
 {
-	if(impl->interactionMode != planeTouchTangible)
-		return "3";
+//	if(impl->interactionMode != planeTouchTangible)
+//		return "3";
 	//2 is for adding array
 	//3 is for cleaning the selection array
 	//The array is : "2;firstPoint;matrix;lastPoint;matrix;lastPoint;...;
@@ -2519,7 +2536,7 @@ std::string FluidMechanics::getSelectionData()
 	int i;
 	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
-		Matrix4 m = getProjMatrix() * Matrix4::makeTransform(-impl->selectionTransMatrix[i], -impl->selectionRotMatrix[i]);
+		Matrix4 m = getOrthoProjMatrix() * Matrix4::makeTransform(-impl->selectionTransMatrix[i], -impl->selectionRotMatrix[i]);
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{

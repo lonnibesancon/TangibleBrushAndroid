@@ -25,7 +25,7 @@ namespace
 
 Rectangle::Rectangle(float width, float height) : m_width(width), m_height(height), m_material(new Material(vertexShader, fragmentShader)),
 	m_bound(false), m_vertexAttrib(-1), m_projectionUniform(-1), m_modelViewUniform(-1), m_colorUniform(-1),
-	m_color(Vector3(0.0, 0.0, 1.0)), m_opacity(1.0f)
+	m_color(Vector3(0.75, 0.75, 1.75)), m_opacity(0.4f)
 {}
 
 void Rectangle::bind()
