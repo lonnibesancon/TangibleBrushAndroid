@@ -58,4 +58,6 @@ public class FluidMechanics {
 
 	//Get data to send to the computer
 	public static native String getSelectionData();
+	public static native String getPostTreatmentMatrix();
+	public static native String getSubData();
 }

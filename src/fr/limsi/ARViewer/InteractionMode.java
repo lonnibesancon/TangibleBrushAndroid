@@ -9,7 +9,6 @@ public interface InteractionMode{
 	public static final int dataTouch 					= 2 ;
 	//public static final int dataHybrid 					= 3 ;
 
-
 	//Interaction mode for plane
 	public static final int planeTouch 					= 11 ;
 	public static final int planeTangible 				= 12 ;

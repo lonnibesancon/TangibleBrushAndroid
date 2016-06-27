@@ -29,6 +29,8 @@ public:
 
     std::string getData();
 	std::string getSelectionData();
+	std::string getPostTreatmentMatrix();
+	std::string getSubData();
 
     //Called after SetSettings (JNI)
 	void updateSurfacePreview();
