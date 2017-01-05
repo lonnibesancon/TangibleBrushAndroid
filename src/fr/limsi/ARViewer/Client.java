@@ -21,8 +21,9 @@ public class Client extends AsyncTask<String, String, String>{
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
     protected String hostName="10.0.0.1";               //Local
 //	protected String hostName = "192.168.1.95";           //Mickael Computer
+//	protected String hostName = "192.168.1.48";           //Mickael Computer
 //	protected String hostName = "192.168.1.53";           //Mickael Computer
-	//protected String hostName = "192.168.43.192";
+//	protected String hostName = "192.168.43.192";
     protected int portNumber = 8500;
     //protected Socket clientSocket ;
     protected DatagramSocket clientSocket ;
@@ -33,6 +34,9 @@ public class Client extends AsyncTask<String, String, String>{
     protected boolean valuesupdated = false ;
     protected boolean firstConnection = true ;
 	protected boolean selectUpdated = false;
+	protected boolean treatmentUpdated = false;
+	protected boolean subDataUpdated = false;
+	protected boolean modeUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -45,7 +49,10 @@ public class Client extends AsyncTask<String, String, String>{
                                     //Dataset+showVolume+showSurface+showStylus+showSlice+showOutline+Matrix
     protected String dataToSend = "1;1;1;1;1;1;1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1;1;0;0;0;0;1;0;0;0;0;1;0;0;0;0;1;-1;-1;-1;" ;
 	protected String selectData;
+	protected String postTreatment;
+	protected String subData;
     protected String msg ;
+	protected String mode;
     protected int dataset = 1 ;
 
     private long mLastTimestamp = 0;
@@ -115,7 +122,7 @@ public class Client extends AsyncTask<String, String, String>{
             long diff = currentTimestamp - mLastTimestamp ;
 
             //Log.d("Connected == ", "Connected = "+initDone);
-            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true)){
+            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true || treatmentUpdated || modeUpdated || subDataUpdated)){
             	//msg = ""+MATRIXCHANGED+";"+interactionMode+";"+mapperSelected+";"+matrix+PositionAndOrientation+this.seedPoint ;
 				if(valuesupdated || firstConnection)
 				{
@@ -157,6 +164,60 @@ public class Client extends AsyncTask<String, String, String>{
 					}while(counterTries < 4);
 					selectUpdated = false;
 				}
+
+				if(treatmentUpdated)
+				{
+					byte[] data = postTreatment.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					treatmentUpdated = false;
+				}
+
+				if(subDataUpdated)
+				{
+					byte[] data = subData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					subDataUpdated = false;
+				}
+
+				if(modeUpdated)
+				{
+					byte[] data = mode.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					modeUpdated = false;
+				}
 				mLastTimestamp = currentTimestamp ;
             }
         }
@@ -189,16 +250,33 @@ public class Client extends AsyncTask<String, String, String>{
 		this.selectUpdated = true;
 	}
 
+	protected void setPostTreatment(String s)
+	{
+		this.postTreatment = s;
+		this.treatmentUpdated = true;
+	}
+
     protected void setSliceMatrixString(String s){
     	this.sliceMatrix = s ;
     	this.valuesupdated = true ;
     	initDone = true ;
     }
 
+	protected void setSubData(String s)
+	{
+		this.subData = s;
+		this.subDataUpdated = true;
+	}
+
     protected void setSeedPoint(String s){
         this.seedPoint = s ;
         this.valuesupdated = true ;
         initDone = true ;
-    }
+ 	}
 
+	protected void setInteractionMode(String s)
+	{
+		this.mode = s;
+		this.modeUpdated = true;
+	}
 }

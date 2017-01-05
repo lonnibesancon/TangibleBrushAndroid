@@ -78,8 +78,10 @@ extern "C" {
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_reset(JNIEnv* env, jobject obj);
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env, jobject obj);
 
-	//Data to send via computer
+	//Data to send to computer
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData(JNIEnv* env, jobject obj);
+	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPostTreatmentMatrix(JNIEnv* env, jobject obj);
+	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSubData(JNIEnv* env, jobject obj);
 }
 
 // (end of JNI interface)
@@ -180,13 +182,9 @@ struct FluidMechanics::Impl
 	float mInitialZoomFactor ;
 	float mInitialPinchDist ;
 
-
-
 	bool tangoEnabled = false ;
 	int interactionMode = dataTangible ;
 	bool seedPointPlacement = false ;
-
-
 
 	FluidMechanics* app;
 	std::shared_ptr<FluidMechanics::Settings> settings;
@@ -236,6 +234,11 @@ struct FluidMechanics::Impl
 	bool effectorIntersectionValid;
 
 	bool buttonIsPressed;
+	bool hasSelection;
+
+	Synchronized<Matrix4> postTreatmentMatrix;
+	Synchronized<Vector3> postTreatmentTrans;
+	Synchronized<Quaternion> postTreatmentRot;
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
@@ -245,7 +248,11 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
    currentDataRot(Quaternion(Vector3::unitX(), M_PI)),
    prevVec(Vector3::zero()),
    currentTabRot(Quaternion(Vector3::unitX(), M_PI)),
-   buttonIsPressed(false) 
+   buttonIsPressed(false),
+   postTreatmentMatrix(Matrix4::identity()),
+   postTreatmentRot(Quaternion(Vector3::unitX(), 0)),
+   postTreatmentTrans(Vector3::zero()),
+	hasSelection(false)
 {
 	seedingPoint = Vector3(-10000.0,-10000.0,-10000.0);
 	cube.reset(new Cube);
@@ -281,6 +288,10 @@ void FluidMechanics::Impl::reset(){
 
 	setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),Matrix4::makeTransform(Vector3(0, 0, 400)));
 	*/
+
+	postTreatmentMatrix=Matrix4::identity();
+	postTreatmentRot=Quaternion(Vector3::unitX(), 0);
+	postTreatmentTrans=Vector3::zero();
 	
 	selectionRotMatrix.clear();
 	selectionTransMatrix.clear();
@@ -1000,7 +1011,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				else
 					currentSlicePos += trans ;
 
-				tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
+				tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot.inverse());
 				newData = true;
 			}
 			else if( interactionMode == dataTangible || 
@@ -1012,6 +1023,14 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				trans.z *= settings->considerZ ; //* settings->considerTranslation ;
 
 				currentDataPos +=trans ;
+
+				if(hasSelection)
+				{
+					synchronized(postTreatmentTrans)
+					{
+						postTreatmentTrans = postTreatmentTrans + trans;
+					}
+				}
 			}
 		}
 	}
@@ -1043,8 +1062,10 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 			rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), rx);
 			if(!settings->constrainSelection)
 				currentSliceRot = rot ;
-			tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, -currentSliceRot);
+			tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot.inverse());
 			newData = true;
+			if(selectionRotMatrix.size() > 0)
+				hasSelection = true;
 
 		}
 		else if( interactionMode == dataTangible || 
@@ -1056,6 +1077,18 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 			rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
 			rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), rx);
 			currentDataRot = rot;
+
+			if(hasSelection)
+			{
+				synchronized(postTreatmentRot)
+				{
+					Quaternion rot = postTreatmentRot;
+					rot = rot * Quaternion(rot.inverse() * (-Vector3::unitZ()), rz);
+					rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
+					rot = rot * Quaternion(rot.inverse() * Vector3::unitX(), rx);
+					postTreatmentRot = rot;
+				}
+			}
 		}
 
 		//Now for the automatic constraining of interaction
@@ -1692,8 +1725,8 @@ void FluidMechanics::Impl::renderObjects()
 	updateMatrices();
 	//checkPosition();
 
-	//const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
-	const Matrix4 proj = app->getOrthoProjMatrix() * tangibleMatrix;
+	const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
+	//const Matrix4 proj = app->getOrthoProjMatrix() * tangibleMatrix;
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
@@ -2364,7 +2397,6 @@ JNIEXPORT void Java_fr_limsi_ARViewer_FluidMechanics_removeFinger(JNIEnv* env, j
 JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData(JNIEnv* env, jobject obj)
 {
 	try {
-
 		if (!App::getInstance())
 			throw std::runtime_error("init() was not called");
 
@@ -2375,6 +2407,48 @@ JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData
 		android_assert(instance);
 
 		return env->NewStringUTF(instance->getSelectionData().c_str());
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+
+	return NULL;
+}
+
+JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPostTreatmentMatrix(JNIEnv* env, jobject obj)
+{
+	try {
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		return env->NewStringUTF(instance->getPostTreatmentMatrix().c_str());
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+
+	return NULL;
+}
+
+JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSubData(JNIEnv* env, jobject obj)
+{
+	try {
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		return env->NewStringUTF(instance->getSubData().c_str());
 
 	} catch (const std::exception& e) {
 		throwJavaException(env, e.what());
@@ -2519,8 +2593,6 @@ std::string FluidMechanics::getSelectionData()
 	if(position == -1 || impl->movementPositions[position].size() <= 2 || indiceSelection > impl->selectionRotMatrix.size()-1)
 		return " ";
 
-	Matrix4 inv = getProjMatrix().inverse();
-
 	std::string data = "2;";
 	Vector3 firstPos = impl->movementPositions[position][0];
 	firstPos.y *= -1;
@@ -2536,7 +2608,7 @@ std::string FluidMechanics::getSelectionData()
 	int i;
 	for(i=indiceSelection; i < impl->selectionRotMatrix.size() && i < indiceSelection+1; i++)
 	{
-		Matrix4 m = getOrthoProjMatrix() * Matrix4::makeTransform(-impl->selectionTransMatrix[i], -impl->selectionRotMatrix[i]);
+		Matrix4 m = getProjMatrix() * Matrix4::makeTransform(-impl->selectionTransMatrix[i], impl->selectionRotMatrix[i].inverse());
 		const float* mData = m.data_;
 		for(uint32_t j=0; j < 16; j++)
 		{
@@ -2552,5 +2624,45 @@ std::string FluidMechanics::getSelectionData()
 	if(i==indiceSelection)
 		return " ";
 	indiceSelection = i;
+	return data;
+}
+
+std::string FluidMechanics::getPostTreatmentMatrix()
+{
+	std::string data = "4;";
+	char c[1024];
+	synchronized(impl->postTreatmentTrans)
+	{
+		sprintf(c, "%.2f;%.2f;%.2f;", impl->postTreatmentTrans.x, impl->postTreatmentTrans.y, impl->postTreatmentTrans.z);
+		data += c;
+	}
+
+	synchronized(impl->postTreatmentRot)
+	{
+		sprintf(c, "%.2f;%.2f;%.2f;%.2f;", impl->postTreatmentRot.x, impl->postTreatmentRot.y, impl->postTreatmentRot.z, impl->postTreatmentRot.w);
+		data += c;
+	}
+
+	return data;
+}
+
+std::string FluidMechanics::getSubData()
+{
+	std::string data = "5;";
+	char c[1024];
+	synchronized(impl->postTreatmentTrans)
+	{
+		Vector3 pos = impl->currentDataPos - impl->postTreatmentTrans;
+		sprintf(c, "%.2f;%.2f;%.2f;", pos.x, pos.y, pos.z);
+		data += c;
+	}
+
+	synchronized(impl->postTreatmentTrans)
+	{
+		Quaternion q = impl->currentDataRot * impl->postTreatmentRot.inverse();
+		sprintf(c, "%.2f;%.2f;%.2f;%.2f;", q.x, q.y, q.z, q.w);
+		data += c;
+	}
+
 	return data;
 }

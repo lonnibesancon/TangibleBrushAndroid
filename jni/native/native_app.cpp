@@ -58,7 +58,6 @@ void NativeApp::init(const InitParams& params)
 
 	// Create an orthographic projection matrix
 	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, +1.0f);
-	orthoProjMatrix = Matrix4::identity();
 	// const float aspect = (float)videoWidth/videoHeight;
 	// orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1/aspect, 1/aspect, 1.0f, -1.0f);
 }
@@ -83,6 +82,9 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 
 	// Create a perspective projection matrix
 /*  projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+	//float aspect = screenWidget / (float)screenHeight;
+	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+	//projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0f);
 	projMatrix[1][1] *= -1;
 	projMatrix[2][2] *= -1;
 	projMatrix[2][3] *= -1;

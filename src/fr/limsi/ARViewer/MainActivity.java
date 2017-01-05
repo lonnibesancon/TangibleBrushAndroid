@@ -412,6 +412,8 @@ public class MainActivity extends BaseARActivity
                 }
                 //setInteractionMode();
                 FluidMechanics.setInteractionMode(interactionMode);
+				client.setInteractionMode("6" + interactionMode);
+				Log.e("Main", "setInteractionMode");
             }
 
         });
@@ -1696,6 +1698,8 @@ public class MainActivity extends BaseARActivity
 			String s = FluidMechanics.getSelectionData();
 			client.setSelectionData(s);
 			client.setData(FluidMechanics.getData());
+			client.setPostTreatment(FluidMechanics.getPostTreatmentMatrix());
+			client.setSubData(FluidMechanics.getSubData());
             mView.requestRender();
         }
    } 
