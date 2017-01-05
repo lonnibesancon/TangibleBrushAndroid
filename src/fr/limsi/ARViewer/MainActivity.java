@@ -1697,17 +1697,17 @@ public class MainActivity extends BaseARActivity
             //Log.d(TAG,"RequestRender");
 			//
 			//Was for rectangle selection
-			//String s = FluidMechanics.getSelectionData();
-			//client.setSelectionData(s);
+			String s = FluidMechanics.getSelectionData();
+			client.setSelectionData(s);
 
-			if(FluidMechanics.getInSelection())
-			{
-				client.setData(FluidMechanics.getData());
+			client.setData(FluidMechanics.getData());
+		//	if(FluidMechanics.getInSelection())
+		//	{
 				client.setPostTreatment(FluidMechanics.getPostTreatmentMatrix());
 				client.setSubData(FluidMechanics.getSubData());
-			}
+		//	}
 
-			if(FluidMechanics.getPointSelectionToSend())
+		//	if(FluidMechanics.getPointSelectionToSend())
 				client.setPointSelectionData(FluidMechanics.getPointSelectionData());
             mView.requestRender();
         }
