@@ -55,9 +55,12 @@ public class FluidMechanics {
     public static native void reset();
     public static native void resetParticles();
     public static native void getState(FluidMechanics.State state);
+	public static native boolean getPointSelectionToSend();
+	public static native boolean getInSelection();
 
 	//Get data to send to the computer
 	public static native String getSelectionData();
 	public static native String getPostTreatmentMatrix();
 	public static native String getSubData();
+	public static native String getPointSelectionData();
 }

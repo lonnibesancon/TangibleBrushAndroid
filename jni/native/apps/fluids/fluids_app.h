@@ -26,11 +26,14 @@ public:
 	void removeFinger(int fingerID);
 	void reset();
 	void resetParticles();
+	bool getPointSelectionToSend();
+	bool getInSelection();
 
     std::string getData();
 	std::string getSelectionData();
 	std::string getPostTreatmentMatrix();
 	std::string getSubData();
+	std::string getPointSelectionData();
 
     //Called after SetSettings (JNI)
 	void updateSurfacePreview();

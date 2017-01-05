@@ -37,6 +37,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean treatmentUpdated = false;
 	protected boolean subDataUpdated = false;
 	protected boolean modeUpdated = false;
+	protected boolean pointSelectionDataUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -51,6 +52,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected String selectData;
 	protected String postTreatment;
 	protected String subData;
+	protected String pointSelectionData;
     protected String msg ;
 	protected String mode;
     protected int dataset = 1 ;
@@ -201,6 +203,24 @@ public class Client extends AsyncTask<String, String, String>{
 					subDataUpdated = false;
 				}
 
+				if(pointSelectionDataUpdated)
+				{
+					byte[] data = pointSelectionData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					pointSelectionDataUpdated = false;
+				}
+
 				if(modeUpdated)
 				{
 					byte[] data = mode.getBytes();
@@ -266,6 +286,12 @@ public class Client extends AsyncTask<String, String, String>{
 	{
 		this.subData = s;
 		this.subDataUpdated = true;
+	}
+
+	protected void setPointSelectionData(String s)
+	{
+		this.pointSelectionData=s;
+		this.pointSelectionDataUpdated=true;
 	}
 
     protected void setSeedPoint(String s){
