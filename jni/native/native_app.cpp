@@ -82,13 +82,15 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	LOGD("screen size: %d x %d", screenWidth, screenHeight);
 
 	// Create a perspective projection matrix
-	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+/*  projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
 	projMatrix[1][1] *= -1;
 	projMatrix[2][2] *= -1;
 	projMatrix[2][3] *= -1;
 
 	projNearClipDist = -projMatrix[3][2] / (1+projMatrix[2][2]); // 50.0f
 	projFarClipDist  =  projMatrix[3][2] / (1-projMatrix[2][2]); // 2500.0f
+*/
+	projMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
 
 	glViewport(0, 0, screenWidth, screenHeight);
 }
