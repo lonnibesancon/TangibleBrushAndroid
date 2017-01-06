@@ -7,11 +7,12 @@ LOG_FILTER=$(APP_TAG):V NativeApp:V VES:V AndroidRuntime:E libEGL:W StrictMode:V
 all: compile-debug
 
 compile-debug:
-	+$(NDK_PATH)/ndk-build -j NDK_DEBUG=1
+	+$(NDK_PATH)/ndk-build -j4 NDK_DEBUG=1
 	cp thirdparty/TangoSDK_Gemma_Java.jar libs/	
 	cp thirdparty/QCAR/libs/armeabi-v7a/libQCAR.so libs/armeabi-v7a/
 	cp thirdparty/QCAR/libs/QCAR-hacked.jar libs/
 	ant -Djava.compilerargs=-Xlint debug installd
+
 
 # compile-release:
 # 	LC_ALL= $(NDK_PATH)/ndk-build -j NDK_DEBUG=0

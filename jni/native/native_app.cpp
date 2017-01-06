@@ -57,7 +57,7 @@ void NativeApp::init(const InitParams& params)
 	screenHeight = 0;
 
 	// Create an orthographic projection matrix
-	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, +1.0f);
+	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 	// const float aspect = (float)videoWidth/videoHeight;
 	// orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1/aspect, 1/aspect, 1.0f, -1.0f);
 }
@@ -81,7 +81,7 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	LOGD("screen size: %d x %d", screenWidth, screenHeight);
 
 	// Create a perspective projection matrix
-/*  projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
 	//float aspect = screenWidget / (float)screenHeight;
 	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
 	//projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0f);
@@ -91,8 +91,8 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 
 	projNearClipDist = -projMatrix[3][2] / (1+projMatrix[2][2]); // 50.0f
 	projFarClipDist  =  projMatrix[3][2] / (1-projMatrix[2][2]); // 2500.0f
-*/
-	projMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+
+//	projMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	glViewport(0, 0, screenWidth, screenHeight);
 }

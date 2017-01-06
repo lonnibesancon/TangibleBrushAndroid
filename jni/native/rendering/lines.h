@@ -17,8 +17,16 @@ public:
 	void setOpacity(float opacity);
 
 	// (GL context)
+	
 	void render(const Matrix4& projectionMatrix,
-	            const Matrix4& modelViewMatrix);
+	            const Matrix4& modelViewMatrix)
+	{
+		render(projectionMatrix, modelViewMatrix, false);
+	}
+
+	void render(const Matrix4& projectionMatrix,
+	            const Matrix4& modelViewMatrix,
+				bool striped);
 
 	void setLines(const std::vector<Vector3>& lines);
 

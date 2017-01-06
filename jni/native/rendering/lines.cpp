@@ -58,25 +58,26 @@ void Lines::bind()
 
 void Lines::setLines(const std::vector<Vector3>& lines)
 {
-	android_assert(!(lines.size() % 2));
+//	android_assert(!(lines.size() % 2));
 
 	synchronized (mLineData) {
 		mLineData.clear();
-		for (unsigned int i = 0; i < lines.size()/2; ++i) {
-			const Vector3 pt1 = lines.at(i*2+0);
-			const Vector3 pt2 = lines.at(i*2+1);
+		LOGE("START POINT");
+		for (unsigned int i = 0; i < lines.size(); ++i) {
+			const Vector3 pt1 = lines.at(i);
 			mLineData.push_back(pt1.x);
 			mLineData.push_back(pt1.y);
 			mLineData.push_back(pt1.z);
-			mLineData.push_back(pt2.x);
-			mLineData.push_back(pt2.y);
-			mLineData.push_back(pt2.z);
+
+			LOGE("%f, %f %f", pt1.x, pt1.y, pt1.z);
 		}
+		LOGE("END POINT");
+		LOGE("");
 	}
 }
 
 // (GL context)
-void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatrix)
+void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatrix, bool striped)
 {
 	if (!mBound)
 		bind();
@@ -96,7 +97,10 @@ void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatr
 	glUniform4f(mColorUniform, mColor.x, mColor.y, mColor.z, mOpacity);
 
 	// Rendering
-	glDrawArrays(GL_LINES, 0, mLineData.size()/3);
+	if(striped)
+		glDrawArrays(GL_LINE_STRIP, 0, mLineData.size()/3);
+	else
+		glDrawArrays(GL_LINES, 0, mLineData.size()/3);
 
 	glDisableVertexAttribArray(mVertexAttrib);
 }

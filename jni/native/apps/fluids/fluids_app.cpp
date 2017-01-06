@@ -937,7 +937,7 @@ void FluidMechanics::Impl::setMatrices(const Matrix4& volumeMatrix, const Matrix
 
 void FluidMechanics::Impl::setInteractionMode(int mode){
 	//If we don't need to move anymore
-	if(interactionMode == planeTouchTangible)
+	if(interactionMode != planeTouchTangible)
 	{
 		listPointSelection.clear();
 		idPointerSelection = -1;
@@ -1477,9 +1477,11 @@ void FluidMechanics::Impl::addFinger(float x, float y, int fingerID){
         mInitialZoomFactor = settings->zoomFactor;
 	}
 
-	if(idPointerSelection == -1 && interactionMode == planeTouch)
+	LOGE("interactionMode %d", interactionMode);
+	if(idPointerSelection == -1 && interactionMode == planeTouchTangible)
 	{
 		idPointerSelection = fingerID;
+		listPointSelection.clear();
 	}
 }
 void FluidMechanics::Impl::removeFinger(int fingerID){
@@ -1517,7 +1519,7 @@ void FluidMechanics::Impl::removeFinger(int fingerID){
 	{
 		idPointerSelection = -1;
 
-		if(interactionMode == planeTouch)
+		if(interactionMode == planeTouchTangible)
 		{
 			//If the distance is correct, finish the object
 			if((*(listPointSelection.rbegin())-listPointSelection[0]).length() < 0.2)
@@ -1565,9 +1567,9 @@ void FluidMechanics::Impl::updateFingerPositions(float x, float y, int fingerID)
 	}
 
 	//Add the position to the array
-	if(idPointerSelection == fingerID && interactionMode == planeTouch)
+	if(idPointerSelection == fingerID && interactionMode == planeTouchTangible)
 	{
-		listPointSelection.push_back(pos);
+		listPointSelection.push_back(Vector3(2.0f*pos.x/screenW - 1, -2.0f*pos.y/screenH+1, 0.0f));
 	}
 }
 
@@ -2067,7 +2069,14 @@ void FluidMechanics::Impl::renderObjects()
 
 		if(interactionMode == planeTouch || interactionMode == planeTouchTangible)
 		{
-
+			LOGE("IN PLAN TOUCH RENDERING");
+			if(listPointSelection.size() > 1)
+			{
+				LOGE("in rendering lines");
+				Lines lines;
+				lines.setLines(listPointSelection);
+				lines.render(Matrix4::identity(), Matrix4::identity(), true);
+			}
 		}
 	}
 }
@@ -2799,6 +2808,13 @@ std::string FluidMechanics::getSubData()
 
 std::string FluidMechanics::getPointSelectionData()
 {
-	return "6;";
-	//TODO FINISH THE DATA TO SEND
+	std::string data = "6;";
+	char c[1024];
+
+	for(Vector3& v : impl->listPointSelection)
+	{
+		sprintf(c, "%.2f;%.2f;", v.x, v.y);
+		data+=c;
+	}
+	return data;
 }
