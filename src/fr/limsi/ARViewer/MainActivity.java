@@ -1704,7 +1704,7 @@ public class MainActivity extends BaseARActivity
 			{
 				client.setData(FluidMechanics.getData());
 				client.setPostTreatment(FluidMechanics.getPostTreatmentMatrix());
-				client.setSubData(FluidMechanics.getSubData());
+//				client.setSubData(FluidMechanics.getSubData());
 			}
 
 			if(FluidMechanics.getPointSelectionToSend())

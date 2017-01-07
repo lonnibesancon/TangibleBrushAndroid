@@ -2704,7 +2704,7 @@ void FluidMechanics::setGyroValues(double rx, double ry, double rz, double q){
 bool FluidMechanics::getPointSelectionToSend()
 {
 	bool v = impl->pointSelectionToSend;
-	//We consider that once this function is called, we don't need to data anymore
+	//We consider that once this function is called, we don't need the data anymore
 	impl->pointSelectionToSend = false;
 	return v;
 }
@@ -2808,12 +2808,13 @@ std::string FluidMechanics::getSubData()
 
 std::string FluidMechanics::getPointSelectionData()
 {
-	std::string data = "6;";
+	LOGE("Point selection data");
+	std::string data = "6";
 	char c[1024];
 
 	for(Vector3& v : impl->listPointSelection)
 	{
-		sprintf(c, "%.2f;%.2f;", v.x, v.y);
+		sprintf(c, ";%.2f;%.2f", v.x, v.y);
 		data+=c;
 	}
 	return data;
