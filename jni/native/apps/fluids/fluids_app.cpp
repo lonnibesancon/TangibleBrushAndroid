@@ -542,7 +542,8 @@ Vector3 FluidMechanics::Impl::particleJitter()
 void FluidMechanics::Impl::buttonPressed()
 {
 	tangoEnabled = true ;
-
+	if(pointSelectionToSend)
+		pointSelectionIsSend = true;
 	//buttonIsPressed = true;
 }
 
@@ -960,6 +961,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 	Vector3 vec(tx,ty,tz);
 
+	LOGE("SET TANGO FUNCTION");
 	if(tangoEnabled){
 		LOGE("Tango Enabled");
 		Quaternion quat(rx,ry,rz,q);
@@ -2706,13 +2708,14 @@ bool FluidMechanics::getPointSelectionToSend()
 	bool v = impl->pointSelectionToSend;
 	//We consider that once this function is called, we don't need the data anymore
 	impl->pointSelectionToSend = false;
+	impl->pointSelectionIsSend = true;
 	return v;
 }
 
 bool FluidMechanics::getInSelection()
 {
 	//If we move and if we are moving !
-	return impl->interactionMode == planeTouch && impl->listPointSelection.size() > 0;
+	return impl->pointSelectionIsSend;
 }
 
 //get data to send via UDP
@@ -2812,10 +2815,16 @@ std::string FluidMechanics::getPointSelectionData()
 	std::string data = "6";
 	char c[1024];
 
+	Vector3* oldV = NULL;
 	for(Vector3& v : impl->listPointSelection)
 	{
-		sprintf(c, ";%.2f;%.2f", v.x, v.y);
+		//This point is useless
+		if(oldV != NULL)
+			if((oldV->x < v.x-0.001 || oldV->x > v.x+0.001) && (oldV->y < v.y-0.001 || oldV->y > v.y + 0.001))
+				continue;
+		sprintf(c, ";%.3f;%.3f", v.x, v.y);
 		data+=c;
+		oldV = &v;
 	}
 	return data;
 }

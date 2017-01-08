@@ -124,7 +124,7 @@ public class Client extends AsyncTask<String, String, String>{
             long diff = currentTimestamp - mLastTimestamp ;
 
             //Log.d("Connected == ", "Connected = "+initDone);
-            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true || treatmentUpdated || modeUpdated || subDataUpdated)){
+            if (connected == true && initDone == true && (valuesupdated == true || selectUpdated == true || treatmentUpdated || modeUpdated || subDataUpdated) || pointSelectionDataUpdated){
             	//msg = ""+MATRIXCHANGED+";"+interactionMode+";"+mapperSelected+";"+matrix+PositionAndOrientation+this.seedPoint ;
 				if(valuesupdated || firstConnection)
 				{
