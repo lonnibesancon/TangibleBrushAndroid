@@ -119,7 +119,9 @@ public class MainActivity extends BaseARActivity
     private boolean dataORplaneTouch = true ;    //Data
     private boolean isTangiblePressed = false ;
 
-    private Button seedingBtn ;
+    private Button AddBtn ;
+    private Button SubBtn ;
+    private Button InterBtn ;
     //private Button translateBtn ;
     //private ToggleButton dataORplane ;
     //private ToggleButton translateBtn ;
@@ -381,9 +383,14 @@ public class MainActivity extends BaseARActivity
         resetBtn = (Button) findViewById(R.id.resetBtn);
         this.resetBtn.setOnClickListener(this);
 
-        this.seedingBtn = (Button) findViewById(R.id.seedingBtn);
-        this.seedingBtn.setOnTouchListener(this);
+        this.AddBtn = (Button) findViewById(R.id.addBtn);
+        this.AddBtn.setOnTouchListener(this);
 
+        this.SubBtn = (Button) findViewById(R.id.SubBtn);
+        this.SubBtn.setOnTouchListener(this);
+
+        this.InterBtn = (Button) findViewById(R.id.InterBtn);
+        this.InterBtn.setOnTouchListener(this);
 
         /*touchToggle = (ToggleButton) findViewById(R.id.touchToggle);
         touchToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -1509,79 +1516,44 @@ public class MainActivity extends BaseARActivity
             //return true ;
         }
 
-        /*else if(v.getId() == R.id.constrainX){
+        else if(v.getId() == R.id.addBtn){
+            Log.d("ADDBUTTON", "ADD BUTTON TOUCHED");
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                constrainX = true ;
-                this.constrainXBtn.setPressed(true);
+                fluidSettings.selectionMode = ADD ;
                 this.nbOfFingersButton+=1;
             }
             else if(event.getAction() == MotionEvent.ACTION_UP ){
-                constrainX = false ;
-                this.constrainXBtn.setPressed(false);
-                this.nbOfFingersButton-=1 ;
-                removedButtonFinger = true ;
+                this.nbOfFingersButton-- ;
             }
-            //Log.d(TAG,"Touched constrainX");
-            updateConstraintX();
-            int index = event.getActionIndex();
-            //return true ;
+            updateDataSettings();
         }
 
-        else if(v.getId() == R.id.constrainY){
+        else if(v.getId() == R.id.SubBtn){
+            Log.d("SUBBUTTON", "SUB BUTTON TOUCHED");
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                constrainY = true ;
-                this.constrainYBtn.setPressed(true);
+                fluidSettings.selectionMode = SUB ;
                 this.nbOfFingersButton+=1;
             }
             else if(event.getAction() == MotionEvent.ACTION_UP ){
-                constrainY = false ;
-                this.constrainYBtn.setPressed(false);
-                this.nbOfFingersButton-=1 ;
-                removedButtonFinger = true ;
+                this.nbOfFingersButton-- ;
             }
-            //Log.d(TAG,"Touched constrainY");
-            updateConstraintY();
-            int index = event.getActionIndex();
-            //return true ;
+            updateDataSettings();
         }
 
-        else if(v.getId() == R.id.constrainZ){
+        else if(v.getId() == R.id.InterBtn){
+            Log.d("INTERBUTTON", "INTER BUTTON TOUCHED");
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                constrainZ = true ;
-                this.constrainZBtn.setPressed(true);
+                fluidSettings.selectionMode = INTER ;
                 this.nbOfFingersButton+=1;
             }
             else if(event.getAction() == MotionEvent.ACTION_UP ){
-                constrainZ = false ;
-                this.constrainZBtn.setPressed(false);
-                this.nbOfFingersButton-=1 ;
-                removedButtonFinger = true ;
+                this.nbOfFingersButton-- ;
             }
-            //Log.d(TAG,"Touched constrainZ");
-            updateConstraintZ();
-            int index = event.getActionIndex();
-            //return true ;
+            updateDataSettings();
         }
-
-        else if(v.getId() == R.id.autoConstrain ){
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                this.autoConstraint = true ;
-                this.autoConstrainBtn.setPressed(true);
-                this.nbOfFingersButton+=1;
-            }
-            else if(event.getAction() == MotionEvent.ACTION_UP ){
-                this.autoConstraint = false ;
-                this.autoConstrainBtn.setPressed(false);
-                this.nbOfFingersButton-=1 ;
-                removedButtonFinger = true ;
-            }
-            //Log.d(TAG,"Touched constrain Auto");
-            updateConstraintAuto();
-            int index = event.getActionIndex();
             //return true ;
-        }*/
 
-        else if(v.getId() == R.id.seedingBtn){
+        /*else if(v.getId() == R.id.seedingBtn){
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
                 fluidSettings.isSeeding = true ;
                 this.seedingBtn.setPressed(true);
@@ -1597,8 +1569,9 @@ public class MainActivity extends BaseARActivity
                 client.valuesupdated = true ;
             }
             updateDataSettings();
-            //return true ;
         }
+            //return true ;*/
+        
 
 
 

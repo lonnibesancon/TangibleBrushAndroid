@@ -24,6 +24,7 @@ public class FluidMechanics {
         int dataORplane ;
         boolean constrainSelection ;
         boolean reset ;
+        int selectionMode = 0 ;
     }
 
     static class State {
