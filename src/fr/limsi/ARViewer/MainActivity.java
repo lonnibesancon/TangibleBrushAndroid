@@ -384,13 +384,13 @@ public class MainActivity extends BaseARActivity
         this.resetBtn.setOnClickListener(this);
 
         this.AddBtn = (Button) findViewById(R.id.addBtn);
-        this.AddBtn.setOnTouchListener(this);
+        this.AddBtn.setOnClickListener(this);
 
         this.SubBtn = (Button) findViewById(R.id.SubBtn);
-        this.SubBtn.setOnTouchListener(this);
+        this.SubBtn.setOnClickListener(this);
 
         this.InterBtn = (Button) findViewById(R.id.InterBtn);
-        this.InterBtn.setOnTouchListener(this);
+        this.InterBtn.setOnClickListener(this);
 
         /*touchToggle = (ToggleButton) findViewById(R.id.touchToggle);
         touchToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -1516,41 +1516,7 @@ public class MainActivity extends BaseARActivity
             //return true ;
         }
 
-        else if(v.getId() == R.id.addBtn){
-            Log.d("ADDBUTTON", "ADD BUTTON TOUCHED");
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = ADD ;
-                this.nbOfFingersButton+=1;
-            }
-            else if(event.getAction() == MotionEvent.ACTION_UP ){
-                this.nbOfFingersButton-- ;
-            }
-            updateDataSettings();
-        }
-
-        else if(v.getId() == R.id.SubBtn){
-            Log.d("SUBBUTTON", "SUB BUTTON TOUCHED");
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = SUB ;
-                this.nbOfFingersButton+=1;
-            }
-            else if(event.getAction() == MotionEvent.ACTION_UP ){
-                this.nbOfFingersButton-- ;
-            }
-            updateDataSettings();
-        }
-
-        else if(v.getId() == R.id.InterBtn){
-            Log.d("INTERBUTTON", "INTER BUTTON TOUCHED");
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = INTER ;
-                this.nbOfFingersButton+=1;
-            }
-            else if(event.getAction() == MotionEvent.ACTION_UP ){
-                this.nbOfFingersButton-- ;
-            }
-            updateDataSettings();
-        }
+    
             //return true ;
 
         /*else if(v.getId() == R.id.seedingBtn){
@@ -1707,6 +1673,31 @@ public class MainActivity extends BaseARActivity
             updateSettings();
 			client.setSelectionData("3");
 			FluidMechanics.reset();
+        }
+         else if(v.getId() == R.id.addBtn){
+            if (event.getAction() == MotionEvent.ACTION_DOWN ){
+                fluidSettings.selectionMode = ADD ;
+                this.nbOfFingersButton+=1;
+            }
+            updateDataSettings();
+        }
+
+        else if(v.getId() == R.id.SubBtn){
+            Log.d("SUBBUTTON", "SUB BUTTON TOUCHED");
+            if (event.getAction() == MotionEvent.ACTION_DOWN ){
+                fluidSettings.selectionMode = SUB ;
+                this.nbOfFingersButton+=1;
+            }
+            updateDataSettings();
+        }
+
+        else if(v.getId() == R.id.InterBtn){
+            Log.d("INTERBUTTON", "INTER BUTTON TOUCHED");
+            if (event.getAction() == MotionEvent.ACTION_DOWN ){
+                fluidSettings.selectionMode = INTER ;
+                this.nbOfFingersButton+=1;
+            }
+            updateDataSettings();
         }
     }
 
