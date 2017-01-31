@@ -247,6 +247,11 @@ struct FluidMechanics::Impl
 	int idPointerSelection;
 	bool pointSelectionIsSend=false;
 	bool pointSelectionToSend=false;
+
+	Vector3_f selectionDirection;
+	double selectionFactorX=1.0f;
+	double selectionFactorY=1.0f;
+	Vector3_f startSelectionPosition;
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
@@ -1017,10 +1022,21 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 					printAny(tmp, "TMP = ");
 					printAny(trans, "TRANS = ");
 				}
+
+
+				if(selectionFactorX == 1.0f)
+				{
+					startSelectionPosition = currentSlicePos;
+					Vector3 t(0, 0, 1);
+					t = currentSliceRot * t;
+					t *= (t.dot(trans));
+					selectionDirection = t;
+
+					//TODO need to change selectionFactor...
+				}
 				
 				if(settings->constrainSelection)
 				{
-					LOGE("CONSTRAIN SELECTION");
 					Vector3 t(0, 0, 1);
 					t = currentSliceRot * t;
 					t *= (t.dot(trans));
@@ -2773,6 +2789,8 @@ std::string FluidMechanics::getPostTreatmentMatrix()
 {
 	std::string data = "4;";
 	char c[1024];
+
+	sprintf(c, "%.2f;%.2f;", impl->selectionFactorX, impl->selectionFactorY);
 	synchronized(impl->postTreatmentTrans)
 	{
 		sprintf(c, "%.2f;%.2f;%.2f;", impl->postTreatmentTrans.x, impl->postTreatmentTrans.y, impl->postTreatmentTrans.z);
@@ -2811,8 +2829,7 @@ std::string FluidMechanics::getSubData()
 
 std::string FluidMechanics::getPointSelectionData()
 {
-	LOGE("Point selection data");
-	std::string data = "6";
+	std::string data = "6;1";
 	char c[1024];
 
 	Vector3* oldV = NULL;
