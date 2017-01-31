@@ -1,6 +1,16 @@
 MAIN_ACTIVITY=fr.limsi.ARViewer/.$(shell grep "<activity android:name" AndroidManifest.xml | cut -d\" -f2)
+
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
+SDK_PATH=/Users/lonnibesancon/Library/Android/sdk
+NDK_PATH=/Users/lonnibesancon/Library/Android/android-ndk-r10e
+$(info MacOS X version of makefile)
+else
 SDK_PATH=/opt/android-sdk
 NDK_PATH=/opt/android-ndk
+$(info Other OS)
+endif
+
 APP_TAG=ARViewer
 LOG_FILTER=$(APP_TAG):V NativeApp:V VES:V AndroidRuntime:E libEGL:W StrictMode:V libc:F DEBUG:I
 

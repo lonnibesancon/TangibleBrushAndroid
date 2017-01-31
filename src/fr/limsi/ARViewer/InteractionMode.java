@@ -2,6 +2,10 @@ package fr.limsi.ARViewer;
 
 public interface InteractionMode{
 
+	public enum SelectionMode {
+		ADD (1), SUB (1), INTER (2);
+	}
+
 	public static final int nothing						= 0 ;
 
 	// Interaction mode for data
