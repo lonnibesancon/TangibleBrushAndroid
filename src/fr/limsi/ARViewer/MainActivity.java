@@ -1674,29 +1674,29 @@ public class MainActivity extends BaseARActivity
 			client.setSelectionData("3");
 			FluidMechanics.reset();
         }
-         else if(v.getId() == R.id.addBtn){
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = ADD ;
-                this.nbOfFingersButton+=1;
-            }
+        else if(v.getId() == R.id.addBtn){
+            
+            fluidSettings.selectionMode = ADD ;
+            this.nbOfFingersButton+=1;
+            
             updateDataSettings();
         }
 
         else if(v.getId() == R.id.SubBtn){
             Log.d("SUBBUTTON", "SUB BUTTON TOUCHED");
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = SUB ;
-                this.nbOfFingersButton+=1;
-            }
+            
+            fluidSettings.selectionMode = SUB ;
+            this.nbOfFingersButton+=1;
+            
             updateDataSettings();
         }
 
         else if(v.getId() == R.id.InterBtn){
             Log.d("INTERBUTTON", "INTER BUTTON TOUCHED");
-            if (event.getAction() == MotionEvent.ACTION_DOWN ){
-                fluidSettings.selectionMode = INTER ;
-                this.nbOfFingersButton+=1;
-            }
+            
+            fluidSettings.selectionMode = INTER ;
+            this.nbOfFingersButton+=1;
+     
             updateDataSettings();
         }
     }
