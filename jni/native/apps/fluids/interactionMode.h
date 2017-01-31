@@ -34,6 +34,10 @@
 #define head		3
 #define velocity	4
 
+#define ADD 0
+#define SUB 1
+#define INTER 2 
+
 
 #define thresholdRST  300.0 
 

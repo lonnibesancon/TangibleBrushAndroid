@@ -87,7 +87,8 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 	   autoConstraint(false),
 	   translatePlane(false),
 	   isSeeding(false),
-	   dataORplane(0)
+	   dataORplane(0),
+	   selectionMode(0)
 	{}
 
 	static constexpr float defaultClipDist = 360.0f;
@@ -120,6 +121,7 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 		SET_JNI_FIELD(obj, showCrossingLines, Boolean, "Z", showCrossingLines);
 		SET_JNI_FIELD(obj, clipDist, Float, "F", clipDist);
 		SET_JNI_FIELD(obj, surfacePreview, Boolean, "Z", surfacePreview);
+		SET_JNI_FIELD(obj, selectionMode, Int, "I", selectionMode);
 
 		//For constraining interaction
 		SET_JNI_FIELD(obj, isSeeding, Boolean, "Z", isSeeding);
@@ -152,6 +154,7 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 		GET_JNI_FIELD(obj, showCrossingLines, Boolean, "Z", showCrossingLines);
 		GET_JNI_FIELD(obj, clipDist, Float, "F", clipDist);
 		GET_JNI_FIELD(obj, surfacePreview, Boolean, "Z", surfacePreview);
+		GET_JNI_FIELD(obj, selectionMode, Int, "I", selectionMode);
 
 		GET_JNI_FIELD(obj, precision, Float, "F", precision);
 
