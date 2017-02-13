@@ -62,17 +62,12 @@ void Lines::setLines(const std::vector<Vector3>& lines)
 
 	synchronized (mLineData) {
 		mLineData.clear();
-		LOGE("START POINT");
 		for (unsigned int i = 0; i < lines.size(); ++i) {
 			const Vector3 pt1 = lines.at(i);
 			mLineData.push_back(pt1.x);
 			mLineData.push_back(pt1.y);
 			mLineData.push_back(pt1.z);
-
-			LOGE("%f, %f %f", pt1.x, pt1.y, pt1.z);
 		}
-		LOGE("END POINT");
-		LOGE("");
 	}
 }
 

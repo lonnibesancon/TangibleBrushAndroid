@@ -85,6 +85,7 @@ extern "C" {
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPostTreatmentMatrix(JNIEnv* env, jobject obj);
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSubData(JNIEnv* env, jobject obj);
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPointSelectionData(JNIEnv* env, jobject obj);
+	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getTabletMatrix(JNIEnv* env, jobject obj);
 }
 
 // (end of JNI interface)
@@ -248,10 +249,8 @@ struct FluidMechanics::Impl
 	bool pointSelectionIsSend=false;
 	bool pointSelectionToSend=false;
 
-	Vector3_f selectionDirection;
-	double selectionFactorX=1.0f;
-	double selectionFactorY=1.0f;
 	Vector3_f startSelectionPosition;
+	Vector3_f modelSize;
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
@@ -399,6 +398,8 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 	double spacing[3];
 	data->GetSpacing(spacing);
 	dataSpacing = Vector3(spacing[0], spacing[1], spacing[2]);
+
+	modelSize = Vector3(spacing[0]*dataDim[0], spacing[1]*dataDim[1], spacing[2]*dataDim[2]);
 
 	// Compute a default zoom value according to the data dimensions
 	// static const float nativeSize = 128.0f;
@@ -966,9 +967,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 	Vector3 vec(tx,ty,tz);
 
-	LOGE("SET TANGO FUNCTION");
 	if(tangoEnabled){
-		LOGE("Tango Enabled");
 		Quaternion quat(rx,ry,rz,q);
 
 		//LOGD("autoConstraint == %d",settings->autoConstraint);
@@ -1024,17 +1023,6 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				}
 
 
-				if(selectionFactorX == 1.0f)
-				{
-					startSelectionPosition = currentSlicePos;
-					Vector3 t(0, 0, 1);
-					t = currentSliceRot * t;
-					t *= (t.dot(trans));
-					selectionDirection = t;
-
-					//TODO need to change selectionFactor...
-				}
-				
 				if(settings->constrainSelection)
 				{
 					Vector3 t(0, 0, 1);
@@ -1544,6 +1532,8 @@ void FluidMechanics::Impl::removeFinger(int fingerID){
 			{
 				listPointSelection.push_back(listPointSelection[0]);
 				pointSelectionToSend = true;
+				startSelectionPosition = tangibleMatrix*state->modelMatrix*(Vector3(0.0, 0.0, 0.0));
+			//	startSelectionPosition = -tangibleMatrix.position()+currentDataPos-modelSize;
 			}
 
 			//Else, empty the vector
@@ -1864,7 +1854,7 @@ void FluidMechanics::Impl::renderObjects()
 
 	if (settings->showStylus && state->stylusVisible && cube) {
 		glDepthMask(true);
-		glEnable(GL_CULL_FACE);
+//		glEnable(GL_CULL_FACE);
 
 		Matrix4 smm;
 		synchronized(state->stylusModelMatrix) {
@@ -2087,13 +2077,22 @@ void FluidMechanics::Impl::renderObjects()
 
 		if(interactionMode == planeTouch || interactionMode == planeTouchTangible)
 		{
-			LOGE("IN PLAN TOUCH RENDERING");
 			if(listPointSelection.size() > 1)
 			{
-				LOGE("in rendering lines");
 				Lines lines;
 				lines.setLines(listPointSelection);
+
+				//Vector3_f pos = -tangibleMatrix.position()+currentDataPos-modelSize;
+			//	Vector3_f pos   = proj*Vector3_f(0.0, 0.0, currentDataPos.z);
+//				Vector3_f pos   = tangibleMatrix*state->modelMatrix*Vector3(0.0, 0.0, 0.0);
+	//			LOGE("pos Z: %f, %f", pos.z, startSelectionPosition.z);
+	//			Matrix4_f scale = Matrix4::identity();
+	//		   	Vector3_f s = Vector3_f(std::pow(1.02, (startSelectionPosition.z-pos.z)), std::pow(1.02, (startSelectionPosition.z-pos.z)), 1.0);
+	//			scale.setScale(s);
+//				LOGE("scale  : %f, %f", s.x, s.y);
+	//			lines.render(Matrix4::identity(), scale, true);
 				lines.render(Matrix4::identity(), Matrix4::identity(), true);
+	
 			}
 		}
 	}
@@ -2602,6 +2601,27 @@ JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPointSelectio
 	return NULL;
 }
 
+JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getTabletMatrix(JNIEnv* env, jobject obj)
+{
+	try {
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		return env->NewStringUTF(instance->getTabletMatrix().c_str());
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+
+	return NULL;
+}
+
 JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getInSelection(JNIEnv* env, jobject obj)
 {
 	try {
@@ -2790,7 +2810,12 @@ std::string FluidMechanics::getPostTreatmentMatrix()
 	std::string data = "4;";
 	char c[1024];
 
-	sprintf(c, "%.2f;%.2f;", impl->selectionFactorX, impl->selectionFactorY);
+//	Vector3_f pos = getProjMatrix() * impl->tangibleMatrix * Vector3_f(0.0, 0.0, zNear);
+	
+//	sprintf(c, "%.2f;%.2f;", scaleFrustumX, scaleFrustumY);
+	sprintf(c, "1.0;1.0;");
+	data += c;
+
 	synchronized(impl->postTreatmentTrans)
 	{
 		sprintf(c, "%.2f;%.2f;%.2f;", impl->postTreatmentTrans.x, impl->postTreatmentTrans.y, impl->postTreatmentTrans.z);
@@ -2803,6 +2828,20 @@ std::string FluidMechanics::getPostTreatmentMatrix()
 		data += c;
 	}
 
+	return data;
+}
+
+std::string FluidMechanics::getTabletMatrix()
+{
+	std::string data = "7;";
+	char c[1024];
+	Matrix4 mat = impl->tangibleMatrix * Matrix4_f::makeTransform(impl->currentDataPos, impl->currentDataRot, Vector3_f(1.0, 1.0, 1.0));
+
+	for(uint32_t i=0; i < 16; i++)
+	{
+		sprintf(c, "%f;", mat.data_[i]);
+		data+=c;
+	}
 	return data;
 }
 
@@ -2829,17 +2868,19 @@ std::string FluidMechanics::getSubData()
 
 std::string FluidMechanics::getPointSelectionData()
 {
-	std::string data = "6;1";
+	std::string data = "6;";
 	char c[1024];
+	sprintf(c, "%d;", impl->settings->selectionMode);
+	data+=c;
 
 	Vector3* oldV = NULL;
 	for(Vector3& v : impl->listPointSelection)
 	{
 		//This point is useless
 		if(oldV != NULL)
-			if((oldV->x < v.x-0.001 || oldV->x > v.x+0.001) && (oldV->y < v.y-0.001 || oldV->y > v.y + 0.001))
+			if(oldV->x > v.x-0.001 && oldV->x < v.x+0.001 && oldV->y > v.y-0.001 && oldV->y < v.y + 0.001)
 				continue;
-		sprintf(c, ";%.3f;%.3f", v.x, v.y);
+		sprintf(c, "%.3f;%.3f;", v.x, v.y);
 		data+=c;
 		oldV = &v;
 	}

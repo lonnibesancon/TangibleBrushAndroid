@@ -57,9 +57,13 @@ void NativeApp::init(const InitParams& params)
 	screenHeight = 0;
 
 	// Create an orthographic projection matrix
-	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-	// const float aspect = (float)videoWidth/videoHeight;
-	// orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1/aspect, 1/aspect, 1.0f, -1.0f);
+//	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+	const float aspect = (float)screenWidth/screenHeight;
+	projMatrix    = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+	orthoProjMatrix = Matrix4::ortho(-1.0f, 1.0f, -1/aspect, 1/aspect, 1.0f, -1.0f);
+	orthoProjMatrix[1][1] *= -1;
+	orthoProjMatrix[2][2] *= -1;
+	orthoProjMatrix[2][3] *= -1;
 }
 
 NativeApp::~NativeApp()
@@ -81,10 +85,22 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	LOGD("screen size: %d x %d", screenWidth, screenHeight);
 
 	// Create a perspective projection matrix
-	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
-	//float aspect = screenWidget / (float)screenHeight;
-	projMatrix = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
-	//projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0f);
+	projMatrix    = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
+//	scaleFrustumY = std::tan(35.0*0.5*M_PI/180)/2.0f;
+//	scaleFrustumX = scaleFrustumY * float(screenWidth)/screenHeight;
+	Vector3_f pN = projMatrix * Vector3_f(1.0, 1.0, 50.0);
+	Vector3_f pF = projMatrix * Vector3_f(1.0, 1.0, 51.0);
+
+	scaleFrustumX = (pN.x-pF.x)/pF.x/2.0;
+	scaleFrustumY = (pN.y-pF.y)/pF.y/2.0;
+
+	LOGE("frstrum %f, %f", scaleFrustumX, scaleFrustumY);
+	LOGE("fX %f, %f", pN.x, pF.x);
+	LOGE("fY %f, %f", pN.y, pF.y);
+	zNear         = 50;
+
+	float aspect = screenWidth / (float)screenHeight;
+	projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0f);
 	projMatrix[1][1] *= -1;
 	projMatrix[2][2] *= -1;
 	projMatrix[2][3] *= -1;

@@ -19,8 +19,8 @@ public class Client extends AsyncTask<String, String, String>{
 	//protected String hostName = "192.168.1.41" ;       //Home computer
     //protected String hostName = "192.168.0.133" ;        //Aviz computer
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
-    protected String hostName="10.0.0.1";               //Local
-//	protected String hostName = "192.168.1.95";           //Mickael Computer
+//    protected String hostName="10.0.0.1";               //Local
+	protected String hostName = "192.168.1.95";           //Mickael Computer
 //	protected String hostName = "192.168.1.48";           //Mickael Computer
 //	protected String hostName = "192.168.1.53";           //Mickael Computer
 //	protected String hostName = "192.168.43.192";
@@ -38,6 +38,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean subDataUpdated = false;
 	protected boolean modeUpdated = false;
 	protected boolean pointSelectionDataUpdated = false;
+	protected boolean tabletMatrixUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -55,6 +56,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected String pointSelectionData;
     protected String msg ;
 	protected String mode;
+	protected String tabletMatrixData;
     protected int dataset = 1 ;
 
     private long mLastTimestamp = 0;
@@ -167,6 +169,24 @@ public class Client extends AsyncTask<String, String, String>{
 					selectUpdated = false;
 				}
 
+				if(pointSelectionDataUpdated)
+				{
+					byte[] data = pointSelectionData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					pointSelectionDataUpdated = false;
+				}
+
 				if(treatmentUpdated)
 				{
 					byte[] data = postTreatment.getBytes();
@@ -203,9 +223,9 @@ public class Client extends AsyncTask<String, String, String>{
 					subDataUpdated = false;
 				}
 
-				if(pointSelectionDataUpdated)
+				if(modeUpdated)
 				{
-					byte[] data = pointSelectionData.getBytes();
+					byte[] data = mode.getBytes();
 					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
 					counterTries = 0 ;
 					do {
@@ -218,12 +238,12 @@ public class Client extends AsyncTask<String, String, String>{
 							counterTries ++ ;
 						}
 					}while(counterTries < 4);
-					pointSelectionDataUpdated = false;
+					modeUpdated = false;
 				}
 
-				if(modeUpdated)
+				if(tabletMatrixUpdated)
 				{
-					byte[] data = mode.getBytes();
+					byte[] data = tabletMatrixData.getBytes();
 					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
 					counterTries = 0 ;
 					do {
@@ -299,6 +319,12 @@ public class Client extends AsyncTask<String, String, String>{
         this.valuesupdated = true ;
         initDone = true ;
  	}
+
+	protected void setTabletMatrixData(String s)
+	{
+		this.tabletMatrixData = s;
+		this.tabletMatrixUpdated = true;
+	}
 
 	protected void setInteractionMode(String s)
 	{

@@ -489,6 +489,10 @@ struct Vector3
 
 	Vector3& operator/=(T scale)
 	{
+		if(scale == 0)
+		{
+			LOGE("merde");
+		}
 		android_assert(scale != 0);
 		T invScale = 1 / scale;
 		return (*this *= invScale);

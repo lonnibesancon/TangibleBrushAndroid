@@ -33,6 +33,9 @@ public:
 
 	SettingsPtr getSettings() const { return settings; }
 	StatePtr getState() const { return state; }
+	float scaleFrustumX;
+	float scaleFrustumY;
+	float zNear;
 
 protected:
 	NativeApp(const InitParams& params, SettingsPtr settings_, StatePtr state_);

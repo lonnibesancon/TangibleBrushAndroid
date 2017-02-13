@@ -64,4 +64,5 @@ public class FluidMechanics {
 	public static native String getPostTreatmentMatrix();
 	public static native String getSubData();
 	public static native String getPointSelectionData();
+	public static native String getTabletMatrix();
 }

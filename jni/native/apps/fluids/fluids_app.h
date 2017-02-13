@@ -34,6 +34,7 @@ public:
 	std::string getPostTreatmentMatrix();
 	std::string getSubData();
 	std::string getPointSelectionData();
+	std::string getTabletMatrix();
 
     //Called after SetSettings (JNI)
 	void updateSurfacePreview();
