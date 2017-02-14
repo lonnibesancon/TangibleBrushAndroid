@@ -1488,6 +1488,7 @@ void FluidMechanics::Impl::addFinger(float x, float y, int fingerID){
 	{
 		idPointerSelection = fingerID;
 		listPointSelection.clear();
+		tangibleMatrix = Matrix4::identity();
 	}
 }
 void FluidMechanics::Impl::removeFinger(int fingerID){
@@ -2079,6 +2080,7 @@ void FluidMechanics::Impl::renderObjects()
 		{
 			if(listPointSelection.size() > 1)
 			{
+				glClear(GL_DEPTH_BUFFER_BIT);
 				Lines lines;
 				lines.setLines(listPointSelection);
 
@@ -2835,7 +2837,7 @@ std::string FluidMechanics::getTabletMatrix()
 {
 	std::string data = "7;";
 	char c[1024];
-	Matrix4 mat = impl->tangibleMatrix * Matrix4_f::makeTransform(impl->currentDataPos, impl->currentDataRot, Vector3_f(1.0, 1.0, 1.0));
+	Matrix4 mat = getProjMatrix() * impl->tangibleMatrix;
 
 	for(uint32_t i=0; i < 16; i++)
 	{
@@ -2873,16 +2875,11 @@ std::string FluidMechanics::getPointSelectionData()
 	sprintf(c, "%d;", impl->settings->selectionMode);
 	data+=c;
 
-	Vector3* oldV = NULL;
-	for(Vector3& v : impl->listPointSelection)
+	for(uint32_t i=0; i < impl->listPointSelection.size(); i+=5) //On  a pas besoin de tous les points ! il y en a trop
 	{
-		//This point is useless
-		if(oldV != NULL)
-			if(oldV->x > v.x-0.001 && oldV->x < v.x+0.001 && oldV->y > v.y-0.001 && oldV->y < v.y + 0.001)
-				continue;
+		Vector3 v = impl->listPointSelection[i];
 		sprintf(c, "%.3f;%.3f;", v.x, v.y);
 		data+=c;
-		oldV = &v;
 	}
 	return data;
 }

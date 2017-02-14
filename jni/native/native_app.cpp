@@ -94,13 +94,10 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	scaleFrustumX = (pN.x-pF.x)/pF.x/2.0;
 	scaleFrustumY = (pN.y-pF.y)/pF.y/2.0;
 
-	LOGE("frstrum %f, %f", scaleFrustumX, scaleFrustumY);
-	LOGE("fX %f, %f", pN.x, pF.x);
-	LOGE("fY %f, %f", pN.y, pF.y);
 	zNear         = 50;
 
 	float aspect = screenWidth / (float)screenHeight;
-	projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0f);
+	projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 0, 1);
 	projMatrix[1][1] *= -1;
 	projMatrix[2][2] *= -1;
 	projMatrix[2][3] *= -1;

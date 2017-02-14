@@ -111,7 +111,7 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 	int dataORplane = 0 ; //Data
 	bool constrainSelection = false ;
 	bool reset = false ;
-	int selectionMode = 0 ;
+	int selectionMode = 1 ;//Default : Union
 
 	void read(JNIEnv* env, jobject obj, jclass cls) const
 	{
