@@ -82,7 +82,6 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	android_assert(width > 0 && height > 0);
 	screenWidth = width;
 	screenHeight = height;
-	LOGD("screen size: %d x %d", screenWidth, screenHeight);
 
 	// Create a perspective projection matrix
 	projMatrix    = Matrix4::perspective(35.0f, float(screenWidth)/screenHeight, 50.0f, 2500.0f);
@@ -97,7 +96,8 @@ void NativeApp::reshape(unsigned int width, unsigned int height)
 	zNear         = 50;
 
 	float aspect = screenWidth / (float)screenHeight;
-	projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 0, 1);
+	//LOGE("screenWidth %d screenHeight %d", screenWidth, screenHeight);
+	projMatrix = Matrix4::ortho(-100.0f, 100.0f, -100.0f/aspect, 100.0f/aspect, 50.0f, 2500.0);
 	projMatrix[1][1] *= -1;
 	projMatrix[2][2] *= -1;
 	projMatrix[2][3] *= -1;

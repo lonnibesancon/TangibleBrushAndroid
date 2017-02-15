@@ -89,7 +89,7 @@ struct FluidMechanics::Settings : public NativeApp::Settings
 	   translatePlane(false),
 	   isSeeding(false),
 	   dataORplane(0),
-	   selectionMode(0)
+	   selectionMode(1)
 	{}
 
 	static constexpr float defaultClipDist = 360.0f;

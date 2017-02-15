@@ -2813,22 +2813,16 @@ std::string FluidMechanics::getPostTreatmentMatrix()
 	char c[1024];
 
 //	Vector3_f pos = getProjMatrix() * impl->tangibleMatrix * Vector3_f(0.0, 0.0, zNear);
-	
 //	sprintf(c, "%.2f;%.2f;", scaleFrustumX, scaleFrustumY);
 	sprintf(c, "1.0;1.0;");
 	data += c;
 
-	synchronized(impl->postTreatmentTrans)
-	{
-		sprintf(c, "%.2f;%.2f;%.2f;", impl->postTreatmentTrans.x, impl->postTreatmentTrans.y, impl->postTreatmentTrans.z);
-		data += c;
-	}
+	sprintf(c, "%.2f;%.2f;%.2f;", -impl->currentSlicePos.x, -impl->currentSlicePos.y, -impl->currentSlicePos.z);
+	data += c;
 
-	synchronized(impl->postTreatmentRot)
-	{
-		sprintf(c, "%.2f;%.2f;%.2f;%.2f;", impl->postTreatmentRot.x, impl->postTreatmentRot.y, impl->postTreatmentRot.z, impl->postTreatmentRot.w);
-		data += c;
-	}
+	Quaternion q = impl->currentSliceRot.inverse();
+	sprintf(c, "%.2f;%.2f;%.2f;%.2f;", q.x, q.y, q.z, q.w);
+	data += c;
 
 	return data;
 }
@@ -2837,13 +2831,22 @@ std::string FluidMechanics::getTabletMatrix()
 {
 	std::string data = "7;";
 	char c[1024];
-	Matrix4 mat = getProjMatrix() * impl->tangibleMatrix;
+	Matrix4 mat = getProjMatrix(); 
+
 
 	for(uint32_t i=0; i < 16; i++)
 	{
 		sprintf(c, "%f;", mat.data_[i]);
 		data+=c;
 	}
+
+	sprintf(c, "%.2f;%.2f;%.2f;", impl->currentDataPos.x, impl->currentDataPos.y, impl->currentDataPos.z);
+	data+= c;
+
+	Quaternion q = impl->currentDataRot.inverse();
+	sprintf(c, "%.2f;%.2f;%.2f;%.2f;", q.x, q.y, q.z, q.w);
+	data+=c;
+
 	return data;
 }
 
@@ -2875,10 +2878,10 @@ std::string FluidMechanics::getPointSelectionData()
 	sprintf(c, "%d;", impl->settings->selectionMode);
 	data+=c;
 
-	for(uint32_t i=0; i < impl->listPointSelection.size(); i+=5) //On  a pas besoin de tous les points ! il y en a trop
+	for(uint32_t i=0; i < impl->listPointSelection.size(); i+=3) //On  a pas besoin de tous les points ! il y en a trop
 	{
 		Vector3 v = impl->listPointSelection[i];
-		sprintf(c, "%.3f;%.3f;", v.x, v.y);
+		sprintf(c, "%.2f;%.2f;", v.x, v.y);
 		data+=c;
 	}
 	return data;
