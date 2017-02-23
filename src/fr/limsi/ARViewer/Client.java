@@ -130,7 +130,7 @@ public class Client extends AsyncTask<String, String, String>{
             	//msg = ""+MATRIXCHANGED+";"+interactionMode+";"+mapperSelected+";"+matrix+PositionAndOrientation+this.seedPoint ;
 				if(valuesupdated || firstConnection)
 				{
-					msg = ""+dataset+";"+dataToSend+considerX+";"+considerY+";"+considerZ+";";
+					msg = "0;"+dataset+";"+dataToSend+considerX+";"+considerY+";"+considerZ+";";
 					byte[] data = msg.getBytes();
 					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
 					counterTries = 0 ;

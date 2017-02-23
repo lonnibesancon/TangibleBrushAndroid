@@ -79,7 +79,7 @@ void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatr
 
 	if (mLineData.empty())
 		return;
-	glLineWidth(5.0);
+	glLineWidth(8.0);
 
 	glUseProgram(mMaterial->getHandle());
 
