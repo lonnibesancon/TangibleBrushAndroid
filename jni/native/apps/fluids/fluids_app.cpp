@@ -77,6 +77,7 @@ extern "C" {
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_removeFinger(JNIEnv* env, jobject obj, jint fingerID);
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_reset(JNIEnv* env, jobject obj);
     JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_resetParticles(JNIEnv* env, jobject obj);
+	JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_changeSelectionMode(JNIEnv* env, jobject obj);
     JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPointSelectionToSend(JNIEnv* env, jobject obj);
     JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getInSelection(JNIEnv* env, jobject obj);
 
@@ -289,7 +290,7 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 
 void FluidMechanics::Impl::reset(){
 	seedingPoint = Vector3(-1,-1,-1);
-	/*
+	
 	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
 	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
 	currentSlicePos = Vector3(0, 0, 0);
@@ -300,7 +301,7 @@ void FluidMechanics::Impl::reset(){
 		p.valid = false;
 
 	setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),Matrix4::makeTransform(Vector3(0, 0, 400)));
-	*/
+	
 
 	postTreatmentMatrix=Matrix4::identity();
 	postTreatmentRot=Quaternion(Vector3::unitX(), 0);
@@ -956,8 +957,11 @@ void FluidMechanics::Impl::setInteractionMode(int mode){
 	selectionTransMatrix.clear();
 	selectionLastPos.clear();
 
-	currentSlicePos = Vector3::zero();
-	currentSliceRot = Quaternion(Vector3::unitX(), 0);
+	if(interactionMode == dataTangible || interactionMode == dataTouchTangible || interactionMode == dataPlaneTouchTangible)
+	{
+		currentSlicePos = Vector3::zero();
+		currentSliceRot = Quaternion(Vector3::unitX(), 0);
+	}
 }
 
 void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, double rx, double ry, double rz, double q){
@@ -1488,7 +1492,7 @@ void FluidMechanics::Impl::addFinger(float x, float y, int fingerID){
 	{
 		idPointerSelection = fingerID;
 		listPointSelection.clear();
-		tangibleMatrix = Matrix4::identity();
+//		tangibleMatrix = Matrix4::identity();
 	}
 }
 void FluidMechanics::Impl::removeFinger(int fingerID){
@@ -1502,8 +1506,8 @@ void FluidMechanics::Impl::removeFinger(int fingerID){
 		selectionRotMatrix.clear();
 		selectionTransMatrix.clear();
 		selectionLastPos.clear();
-		currentSlicePos = Vector3::zero();
-		currentSliceRot = Quaternion(Vector3::unitX(), 0);
+//		currentSlicePos = Vector3::zero();
+//		currentSliceRot = Quaternion(Vector3::unitX(), 0);
 	}
 	//LOGD("Size = %d, position == %d", fingerPositions.size(), position);
 	synchronized(prevFingerPositions){
@@ -2644,6 +2648,25 @@ JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getInSelection(JNIE
 
 }
 
+JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_changeSelectionMode(JNIEnv* env, jobject obj)
+{
+	try {
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		instance->changeSelectionMode();
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+}
+
 FluidMechanics::FluidMechanics(const InitParams& params)
  : NativeApp(params, SettingsPtr(new FluidMechanics::Settings), StatePtr(new FluidMechanics::State)),
    impl(new Impl(params.baseDir)), indiceSelection(0)
@@ -2885,4 +2908,10 @@ std::string FluidMechanics::getPointSelectionData()
 		data+=c;
 	}
 	return data;
+}
+
+void FluidMechanics::changeSelectionMode()
+{
+	impl->pointSelectionToSend = true;
+	impl->pointSelectionIsSend = false;
 }

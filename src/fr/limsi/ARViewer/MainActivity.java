@@ -227,11 +227,10 @@ public class MainActivity extends BaseARActivity
                 }
                 else{
                     pId = p ;
+					client.setPId(p);
                     openFile();
                 }
             }
-            
-          
           }
         });
 
@@ -1500,6 +1499,7 @@ public class MainActivity extends BaseARActivity
             int index = event.getActionIndex();
             //Log.d(TAG,"INDEX = "+fingerOnButtonIndex);
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
+				client.setTangoData("8;" + ((this.interactionMode == planeTouchTangible) ? "1" : "0"));
                 isTangiblePressed = true ;
                 FluidMechanics.buttonPressed();
                 this.tangibleBtn.setPressed(true);
@@ -1507,6 +1507,7 @@ public class MainActivity extends BaseARActivity
             }
             else if(event.getAction() == MotionEvent.ACTION_UP ){
                 FluidMechanics.buttonReleased();
+				client.setTangoData("8;0");
                 isTangiblePressed = false ;
                 this.tangibleBtn.setPressed(false);
                 this.nbOfFingersButton-=1 ;
@@ -1676,7 +1677,8 @@ public class MainActivity extends BaseARActivity
 			FluidMechanics.reset();
         }
         else if(v.getId() == R.id.addBtn){
-            
+           
+			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = ADD ;
             this.nbOfFingersButton+=1;
             
@@ -1684,8 +1686,7 @@ public class MainActivity extends BaseARActivity
         }
 
         else if(v.getId() == R.id.SubBtn){
-            Log.d("SUBBUTTON", "SUB BUTTON TOUCHED");
-            
+			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = SUB ;
             this.nbOfFingersButton+=1;
             
@@ -1693,8 +1694,7 @@ public class MainActivity extends BaseARActivity
         }
 
         else if(v.getId() == R.id.InterBtn){
-            Log.d("INTERBUTTON", "INTER BUTTON TOUCHED");
-            
+			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = INTER ;
             this.nbOfFingersButton+=1;
      

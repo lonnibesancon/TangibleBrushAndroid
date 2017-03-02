@@ -21,9 +21,9 @@ public class Client extends AsyncTask<String, String, String>{
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
 //    protected String hostName="10.0.0.1";               //Local
 //	protected String hostName = "192.168.1.95";           //Mickael Computer
-	protected String hostName = "192.168.1.48";           //Mickael Computer
+//	protected String hostName = "192.168.1.48";           //Mickael Computer
 //	protected String hostName = "192.168.1.53";           //Mickael Computer
-//	protected String hostName = "192.168.43.192";
+	protected String hostName = "192.168.43.192";
     protected int portNumber = 8500;
     //protected Socket clientSocket ;
     protected DatagramSocket clientSocket ;
@@ -39,6 +39,8 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean modeUpdated = false;
 	protected boolean pointSelectionDataUpdated = false;
 	protected boolean tabletMatrixUpdated = false;
+	protected boolean pIdUpdated = false;
+	protected boolean tangoUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -57,6 +59,8 @@ public class Client extends AsyncTask<String, String, String>{
     protected String msg ;
 	protected String mode;
 	protected String tabletMatrixData;
+	protected String tangoData;
+	protected int pId;
     protected int dataset = 1 ;
 
     private long mLastTimestamp = 0;
@@ -258,6 +262,60 @@ public class Client extends AsyncTask<String, String, String>{
 					}while(counterTries < 4);
 					modeUpdated = false;
 				}
+
+				if(tabletMatrixUpdated)
+				{
+					byte[] data = tabletMatrixData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					modeUpdated = false;
+				}
+
+				if(tangoUpdated)
+				{
+					byte[] data = tangoData.getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					tangoUpdated = false;
+				}
+
+				if(pIdUpdated)
+				{
+					byte[] data = ("9;"+Integer.toString(pId)).getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					pIdUpdated = false;
+				}
 				mLastTimestamp = currentTimestamp ;
             }
         }
@@ -330,5 +388,17 @@ public class Client extends AsyncTask<String, String, String>{
 	{
 		this.mode = s;
 		this.modeUpdated = true;
+	}
+
+	protected void setPId(int p)
+	{
+		this.pId = p;
+		this.pIdUpdated = true;
+	}
+
+	protected void setTangoData(String d)
+	{
+		this.tangoData = d;
+		this.tangoUpdated = true;
 	}
 }

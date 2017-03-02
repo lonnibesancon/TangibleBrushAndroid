@@ -28,6 +28,7 @@ public:
 	void resetParticles();
 	bool getPointSelectionToSend();
 	bool getInSelection();
+	void changeSelectionMode();
 
     std::string getData();
 	std::string getSelectionData();
