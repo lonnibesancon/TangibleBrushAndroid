@@ -285,7 +285,7 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 	tangibleSelection.setColor(Vector3(1.0, 1.0, 0.0));
 	lastFingerID=-1;
 	newData = false;
-	tangibleMatrix = Matrix4::identity();
+	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
 }
 
 void FluidMechanics::Impl::reset(){
@@ -310,6 +310,9 @@ void FluidMechanics::Impl::reset(){
 	selectionRotMatrix.clear();
 	selectionTransMatrix.clear();
 	movementPositions.clear();
+	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
+	currentSlicePos = Vector3(0, 0, 0);
+	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
 }
 
 bool FluidMechanics::Impl::checkPosition(){
@@ -961,6 +964,7 @@ void FluidMechanics::Impl::setInteractionMode(int mode){
 	{
 		currentSlicePos = Vector3::zero();
 		currentSliceRot = Quaternion(Vector3::unitX(), 0);
+		tangibleMatrix = Matrix4::identity();
 	}
 }
 
@@ -2680,8 +2684,9 @@ bool FluidMechanics::loadDataSet(const std::string& fileName)
 {
 	impl->setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),
 	                  Matrix4::makeTransform(Vector3(0, 0, 400)));
-	impl->currentSlicePos = Vector3(0, 0, 400);
+	impl->currentSlicePos = Vector3(0, 0, 0);
 	impl->currentDataPos = Vector3(0,0,400);
+	impl->tangibleMatrix = Matrix4::makeTransform(-impl->currentSlicePos, impl->currentSliceRot);
 	return impl->loadDataSet(fileName);
 }
 

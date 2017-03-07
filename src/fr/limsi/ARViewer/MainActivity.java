@@ -228,6 +228,7 @@ public class MainActivity extends BaseARActivity
                 else{
                     pId = p ;
 					client.setPId(p);
+					sendData();
                     openFile();
                 }
             }
@@ -1636,23 +1637,28 @@ public class MainActivity extends BaseARActivity
         if (mView != null){
             //Log.d(TAG,"RequestRender");
 			//
-			//Was for rectangle selection
-			String s = FluidMechanics.getSelectionData();
-			client.setSelectionData(s);
-			client.setData(FluidMechanics.getData());
-			client.setTabletMatrixData(FluidMechanics.getTabletMatrix());
-
-			if(FluidMechanics.getInSelection())
-			{
-				client.setSubData(FluidMechanics.getSubData());
-				client.setPostTreatment(FluidMechanics.getPostTreatmentMatrix());
-			}
-
-			if(FluidMechanics.getPointSelectionToSend())
-				client.setPointSelectionData(FluidMechanics.getPointSelectionData());
+			sendData();
             mView.requestRender();
         }
    } 
+
+   public void sendData()
+   {
+		String s = FluidMechanics.getSelectionData();
+		client.setSelectionData(s);
+		client.setData(FluidMechanics.getData());
+		client.setTabletMatrixData(FluidMechanics.getTabletMatrix());
+
+		if(FluidMechanics.getInSelection())
+		{
+			client.setSubData(FluidMechanics.getSubData());
+			client.setPostTreatment(FluidMechanics.getPostTreatmentMatrix());
+		}
+
+		if(FluidMechanics.getPointSelectionToSend())
+			client.setPointSelectionData(FluidMechanics.getPointSelectionData());
+   }
+
 
    public void changeIP(){
         this.client.closeConnection = false ;
