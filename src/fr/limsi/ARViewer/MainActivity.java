@@ -849,25 +849,25 @@ public class MainActivity extends BaseARActivity
         switch (mDataSet) {
         // switch ((mDataSet++ % 3)) {
             case ftle:
-                FluidMechanics.loadDataset(copyAssetsFileToStorage("ftlelog.vtk", false));
+                FluidMechanics.loadDataset(copyAssetsFileToStorage("data/hemisphere", false));
                 mVelocityDatasetLoaded = false;
 //                client.dataset = ftle ;
                 break;
             case ironprot:
                 // FluidMechanics.loadDataset(copyAssetsFileToStorage("head.vti", false));
-                FluidMechanics.loadDataset(copyAssetsFileToStorage("ironProt.vtk", false));
-                mVelocityDatasetLoaded = false;
+//                FluidMechanics.loadDataset(copyAssetsFileToStorage("data/galaxy", false));
+ //               mVelocityDatasetLoaded = false;
  //               client.dataset = ironprot ;
                 break;
             case head:
-                FluidMechanics.loadDataset(copyAssetsFileToStorage("head.vti", false));
+                FluidMechanics.loadDataset(copyAssetsFileToStorage("data/galaxy", false));
                 mVelocityDatasetLoaded = false;
 //                client.dataset = head ;
                 break;
             case velocities:
-                FluidMechanics.loadDataset(copyAssetsFileToStorage("FTLE7.vtk", false));
-                FluidMechanics.loadVelocityDataset(copyAssetsFileToStorage("Velocities7.vtk", false));
-                mVelocityDatasetLoaded = true;
+//                FluidMechanics.loadDataset(copyAssetsFileToStorage("FTLE7.vtk", false));
+//                FluidMechanics.loadVelocityDataset(copyAssetsFileToStorage("Velocities7.vtk", false));
+//               mVelocityDatasetLoaded = true;
 //                client.dataset = velocities ;
                 break;
 
@@ -1500,7 +1500,7 @@ public class MainActivity extends BaseARActivity
             int index = event.getActionIndex();
             //Log.d(TAG,"INDEX = "+fingerOnButtonIndex);
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
-				client.setTangoData("8;" + ((this.interactionMode == planeTouchTangible) ? "1" : "0"));
+				client.setTangoData("8;" + ((this.interactionMode == planeTouchTangible) ? "1;" : "0;") + Integer.toString(this.interactionMode));
                 isTangiblePressed = true ;
                 FluidMechanics.buttonPressed();
                 this.tangibleBtn.setPressed(true);
@@ -1508,7 +1508,7 @@ public class MainActivity extends BaseARActivity
             }
             else if(event.getAction() == MotionEvent.ACTION_UP ){
                 FluidMechanics.buttonReleased();
-				client.setTangoData("8;0");
+				client.setTangoData("8;0;"+Integer.toString(this.interactionMode));
                 isTangiblePressed = false ;
                 this.tangibleBtn.setPressed(false);
                 this.nbOfFingersButton-=1 ;

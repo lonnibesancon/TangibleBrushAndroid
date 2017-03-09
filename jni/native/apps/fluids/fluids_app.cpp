@@ -45,6 +45,7 @@
 #include <QCAR/UpdateCallback.h>
 #include <QCAR/DataSet.h>
 #include "interactionMode.h"
+#include "rendering/ParticuleObject.h"
 // #include <QCAR/Image.h>
 
 #define NEW_STYLUS_RENDER
@@ -200,11 +201,11 @@ struct FluidMechanics::Impl
 
 	CubePtr cube, axisCube;
 
-	vtkSmartPointer<vtkImageData> data, dataLow;
+//	vtkSmartPointer<vtkImageData> data, dataLow;
 	int dataDim[3];
 	Vector3 dataSpacing;
 
-	vtkSmartPointer<vtkImageData> velocityData;
+//	vtkSmartPointer<vtkImageData> velocityData;
 
 	typedef LinearMath::Vector3<int> DataCoords;
 	Synchronized<std::array<Particle, 200>> particles;
@@ -215,8 +216,8 @@ struct FluidMechanics::Impl
 
 	static constexpr float stylusEffectorDist = 24.0f;
 
-	Synchronized<VolumePtr> volume;
-	Synchronized<IsoSurfacePtr> isosurface, isosurfaceLow;
+//	Synchronized<VolumePtr> volume;
+//	Synchronized<IsoSurfacePtr> isosurface, isosurfaceLow;
 	Synchronized<SlicePtr> slice;
 	Synchronized<CubePtr> outline;
 	Vector3 slicePoint, sliceNormal;
@@ -252,6 +253,9 @@ struct FluidMechanics::Impl
 
 	Vector3_f startSelectionPosition;
 	Vector3_f modelSize;
+
+	ParticuleObject* particuleObject=NULL;
+	std::string modelPath;
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
@@ -343,11 +347,12 @@ void FluidMechanics::Impl::rebind()
 	particleSphere->bind();
 	cylinder->bind();
 
-	synchronized_if(volume) { volume->bind(); }
+/*	synchronized_if(volume) { volume->bind(); }
 	synchronized_if(isosurface) { isosurface->bind(); }
 	synchronized_if(isosurfaceLow) { isosurfaceLow->bind(); }
 	synchronized_if(slice) { slice->bind(); }
 	synchronized_if(outline) { outline->bind(); }
+*/
 }
 
 template <typename T>
@@ -377,7 +382,7 @@ vtkSmartPointer<vtkImageData> FluidMechanics::Impl::loadTypedDataSet(const std::
 
 bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 {
-	synchronized (particles) {
+/*	synchronized (particles) {
 		// Unload velocity data
 		velocityData = nullptr;
 
@@ -385,10 +390,12 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 		for (Particle& p : particles)
 			p.valid = false;
 	}
+*/
 
+	modelPath = fileName;
 	VTKOutputWindow::install();
 
-	const std::string ext = fileName.substr(fileName.find_last_of(".") + 1);
+/*	const std::string ext = fileName.substr(fileName.find_last_of(".") + 1);
 
 	if (ext == "vtk")
 		data = loadTypedDataSet<vtkDataSetReader>(fileName);
@@ -402,18 +409,24 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 	double spacing[3];
 	data->GetSpacing(spacing);
 	dataSpacing = Vector3(spacing[0], spacing[1], spacing[2]);
+*/
 
-	modelSize = Vector3(spacing[0]*dataDim[0], spacing[1]*dataDim[1], spacing[2]*dataDim[2]);
+	if(particuleObject)
+		delete particuleObject;
+	particuleObject = new ParticuleObject(fileName + "/ids", fileName + "/data.d");
+
+//	modelSize = Vector3(spacing[0]*dataDim[0], spacing[1]*dataDim[1], spacing[2]*dataDim[2]);
+	modelSize = particuleObject->getSize();
 
 	// Compute a default zoom value according to the data dimensions
 	// static const float nativeSize = 128.0f;
 	static const float nativeSize = 110.0f;
-	state->computedZoomFactor = nativeSize / std::max(dataSpacing.x*dataDim[0], std::max(dataSpacing.y*dataDim[1], dataSpacing.z*dataDim[2]));
+	state->computedZoomFactor = nativeSize / std::max(modelSize.x, std::max(modelSize.y, modelSize.z));
 	// FIXME: hardcoded value: 0.25 (minimum zoom level, see the
 	// onTouch() handler in Java code)
 	state->computedZoomFactor = std::max(state->computedZoomFactor, 0.25f);
 
-	dataLow = vtkSmartPointer<vtkImageData>::New();
+/*	dataLow = vtkSmartPointer<vtkImageData>::New();
 	vtkNew<vtkImageResize> resizeFilter;
 	resizeFilter->SetInputData(data.GetPointer());
 	resizeFilter->SetOutputDimensions(std::max(dataDim[0]/3, 1), std::max(dataDim[1]/3, 1), std::max(dataDim[2]/3, 1));
@@ -461,13 +474,14 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 		LOGD("creating slice...");
 		slice.reset(new Slice(data));
 	}
+	*/
 
 	return true;
 }
 
 bool FluidMechanics::Impl::loadVelocityDataSet(const std::string& fileName)
 {
-	if (!data)
+/*	if (!data)
 		throw std::runtime_error("No dataset currently loaded");
 
 	VTKOutputWindow::install();
@@ -501,6 +515,7 @@ bool FluidMechanics::Impl::loadVelocityDataSet(const std::string& fileName)
 
 	if (!velocityData->GetPointData() || !velocityData->GetPointData()->GetVectors())
 		throw std::runtime_error("Invalid velocity data: no vectors found");
+*/
 
 	return true;
 }
@@ -564,13 +579,14 @@ float FluidMechanics::Impl::buttonReleased()
 }
 
 void FluidMechanics::Impl::resetParticles(){
-	LOGD("Reset Particle case");
+/*	LOGD("Reset Particle case");
 	for (Particle& p : particles) {
 		p.pos = Vector3(0,0,0);
 		p.delayMs = 0 ;
 		p.stallMs = 0;
 		p.valid = false ;
 	}		
+*/
 	seedingPoint = Vector3(-1000000,-1000000,-1000000);
 }
 
@@ -594,6 +610,7 @@ void FluidMechanics::Impl::releaseParticles()
 	clock_gettime(CLOCK_REALTIME, &particleStartTime);
 
 	int delay = 0;
+	/*
 	LOGD("Starting Particle Computation");
 	synchronized (particles) {
 		for (Particle& p : particles) {
@@ -607,10 +624,12 @@ void FluidMechanics::Impl::releaseParticles()
 	}
 
 	seedPointPlacement = true ;
+*/
 }
 
 void FluidMechanics::Impl::integrateParticleMotion(Particle& p)
 {
+	/*
 	if (!p.valid)
 		return;
 
@@ -641,7 +660,7 @@ void FluidMechanics::Impl::integrateParticleMotion(Particle& p)
 		return;
 	}
 
-	vtkDataArray* vectors = velocityData->GetPointData()->GetVectors();
+//	vtkDataArray* vectors = velocityData->GetPointData()->GetVectors();
 
 	while (elapsedMs > 0) {
 		--elapsedMs;
@@ -668,6 +687,7 @@ void FluidMechanics::Impl::integrateParticleMotion(Particle& p)
 			break;
 		}
 	}
+	*/
 }
 
 bool FluidMechanics::Impl::computeCameraClipPlane(Vector3& point, Vector3& normal)
@@ -969,9 +989,9 @@ void FluidMechanics::Impl::setInteractionMode(int mode){
 }
 
 void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, double rx, double ry, double rz, double q){
-	if(!data ){
-		return ;
-	}
+//	if(!data ){
+//		return ;
+//	}
 
 	Vector3 vec(tx,ty,tz);
 
@@ -1069,9 +1089,9 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 }
 
 void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double q){
-	if(!data){
-		return ;
-	}
+//	if(!data){
+//		return ;
+//	}
 
 	if(settings->considerX == 0 || settings->considerZ == 0 || settings->considerY == 0){
 		return ;
@@ -1357,12 +1377,13 @@ void FluidMechanics::Impl::updateMatrices(){
 	Matrix4 statem ;
 	Matrix4 slicem ;
 	
-	if(settings->isSeeding && velocityData){
+//	if(settings->isSeeding && velocityData){
 		//LOGD("Seeding Case");
-		computeSeedingPlacement();
-	}
+//		computeSeedingPlacement();
+//	}
 
-	else if( interactionMode == dataTouch ||
+
+	if( interactionMode == dataTouch ||
 		interactionMode == planeTouch ||
 		interactionMode == dataTouchTangible ||
 		interactionMode == planeTouchTangible ||
@@ -1593,6 +1614,7 @@ void FluidMechanics::Impl::updateFingerPositions(float x, float y, int fingerID)
 
 void FluidMechanics::Impl::updateSlicePlanes()
 {
+	/*
 	if(!data){
 		return ;
 	}
@@ -1715,9 +1737,9 @@ void FluidMechanics::Impl::updateSlicePlanes()
 	}
 
 	if (clipPlaneSet) {
-		synchronized_if(isosurface) { isosurface->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
-		synchronized_if(isosurfaceLow) { isosurfaceLow->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
-		synchronized_if(volume) { volume->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
+//		synchronized_if(isosurface) { isosurface->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
+//		synchronized_if(isosurfaceLow) { isosurfaceLow->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
+//		synchronized_if(volume) { volume->setClipPlane(sliceNormal.x, sliceNormal.y, sliceNormal.z, -sliceNormal.dot(slicePoint)); }
 
 		// pt: data space
 		// dir: eye space
@@ -1781,7 +1803,9 @@ void FluidMechanics::Impl::updateSlicePlanes()
 		synchronized_if(isosurface) { isosurface->clearClipPlane(); }
 		synchronized_if(isosurfaceLow) { isosurfaceLow->clearClipPlane(); }
 		synchronized_if(volume) { volume->clearClipPlane(); }
+
 	}
+*/
 }
 
 // (GL context)
@@ -1801,10 +1825,7 @@ void FluidMechanics::Impl::renderObjects()
 	glDisable(GL_CULL_FACE);
 	glDepthMask(true); // requires "discard" in the shader where alpha == 0
 
-	if(settings->constrainSelection)
-		LOGE("CONSTRAIN");
-
-	 if (settings->clipDist > 0.0f) {
+/*	 if (settings->clipDist > 0.0f) {
 		// Set a depth value for the slicing plane
 		Matrix4 trans = Matrix4::identity();
 		// trans[3][2] = app->getDepthValue(settings->clipDist); // relative to trans[3][3], which is 1.0
@@ -1818,11 +1839,13 @@ void FluidMechanics::Impl::renderObjects()
 			slice->render(app->getOrthoProjMatrix(), trans);
 		}
 	}
+*/
 
 	// Stylus (paddle?) z-buffer occlusion
 	// TODO: correct occlusion shape for the real *stylus*
-	if (false && state->stylusVisible && cube /*&& (settings->sliceType != SLICE_STYLUS || slice->isEmpty())*/) {
-		glColorMask(false, false, false, false);
+	
+	//if (false && state->stylusVisible && cube /*&& (settings->sliceType != SLICE_STYLUS || slice->isEmpty())*/) {
+	/*	glColorMask(false, false, false, false);
 		glDepthMask(true);
 
 			synchronized (state->stylusModelMatrix) {
@@ -1859,9 +1882,9 @@ void FluidMechanics::Impl::renderObjects()
 			}
 
 		glColorMask(true, true, true, true);
-	}
+	}*/
 
-	if (settings->showStylus && state->stylusVisible && cube) {
+/*	if (settings->showStylus && state->stylusVisible && cube) {
 		glDepthMask(true);
 //		glEnable(GL_CULL_FACE);
 
@@ -1870,6 +1893,7 @@ void FluidMechanics::Impl::renderObjects()
 			smm = state->stylusModelMatrix;
 		}
 	}
+*/
 
 	if (state->tangibleVisible) {
 		Matrix4 mm;
@@ -1885,7 +1909,7 @@ void FluidMechanics::Impl::renderObjects()
 		);
 
 		//Render the outline
-		if(settings->showOutline){
+	/*	if(settings->showOutline){
 			synchronized_if(outline) {
 				glDepthMask(true);
 				glLineWidth(2.0f);
@@ -1903,10 +1927,10 @@ void FluidMechanics::Impl::renderObjects()
 				}
 				outline->render(proj, mm);
 			}
-		}
+		}*/
 
 		// Render the surface
-		if (settings->showSurface) {
+	/*	if (settings->showSurface) {
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_BLEND);
 			glDepthMask(true);
@@ -1961,21 +1985,24 @@ void FluidMechanics::Impl::renderObjects()
 			axisCube->setColor(color);
 			axisCube->render(proj, mm*trans);
 		}
+		*/
 
 		// FIXME: slight misalignment error?
 		// Render the volume
 		if (settings->showVolume) {// && sliceDot <= 0) {
 			glEnable(GL_DEPTH_TEST);
-			synchronized_if(volume) {
+/*  		synchronized_if(volume) {
 				glDepthMask(true);
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // modulate
 				glDisable(GL_CULL_FACE);
 				volume->render(proj, mm);
 			}
+*/
+			particuleObject->render(proj, mm);
 		}
 
-		if (slice && settings->showSlice) {
+/*		if (slice && settings->showSlice) {
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDisable(GL_CULL_FACE);
@@ -2008,7 +2035,7 @@ void FluidMechanics::Impl::renderObjects()
 						}
 
 						synchronized(slice) {
-							slice->setOpaque(true || slice->isEmpty() /*settings->sliceType == SLICE_STYLUS || slice->isEmpty()*/);
+							slice->setOpaque(true || slice->isEmpty() settings->sliceType == SLICE_STYLUS || slice->isEmpty());
 							slice->render(proj, s2mm);
 						}
 
@@ -2018,6 +2045,7 @@ void FluidMechanics::Impl::renderObjects()
 				}
 			}
 		}
+		*/
 
 		/*  
 		//Render the rectangle selection
@@ -2111,7 +2139,7 @@ void FluidMechanics::Impl::renderObjects()
 
 void FluidMechanics::Impl::updateSurfacePreview()
 {
-	if (!settings->surfacePreview) {
+/*	if (!settings->surfacePreview) {
 		synchronized_if(isosurface) {
 			isosurface->setPercentage(settings->surfacePercentage);
 		}
@@ -2120,6 +2148,7 @@ void FluidMechanics::Impl::updateSurfacePreview()
 			isosurfaceLow->setPercentage(settings->surfacePercentage);
 		}
 	}
+*/
 	if(settings->considerX+settings->considerY+settings->considerZ == 3){
 		state->clipAxis = CLIP_NONE ;
 	}
