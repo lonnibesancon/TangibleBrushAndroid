@@ -295,27 +295,27 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 void FluidMechanics::Impl::reset(){
 	seedingPoint = Vector3(-1,-1,-1);
 	
-	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
-	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
+	currentSliceRot = Quaternion(Vector3::unitX(), 0);
+//	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
 	currentSlicePos = Vector3(0, 0, 0);
-	currentDataPos = Vector3(0,0,400);
+//	currentDataPos = Vector3(0,0,0);
 	buttonIsPressed = false ;
 
-	for (Particle& p : particles)
-		p.valid = false;
+//	for (Particle& p : particles)
+//		p.valid = false;
 
-	setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),Matrix4::makeTransform(Vector3(0, 0, 400)));
+//	setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),Matrix4::makeTransform(Vector3(0, 0, 400)));
 	
 
-	postTreatmentMatrix=Matrix4::identity();
-	postTreatmentRot=Quaternion(Vector3::unitX(), 0);
-	postTreatmentTrans=Vector3::zero();
+//	postTreatmentMatrix=Matrix4::identity();
+//	postTreatmentRot=Quaternion(Vector3::unitX(), 0);
+//	postTreatmentTrans=Vector3::zero();
 	
-	selectionRotMatrix.clear();
-	selectionTransMatrix.clear();
-	movementPositions.clear();
-	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
-	currentSlicePos = Vector3(0, 0, 0);
+//	selectionRotMatrix.clear();
+//	selectionTransMatrix.clear();
+//	movementPositions.clear();
+//	currentSliceRot = Quaternion(Vector3::unitX(), M_PI);
+//	currentSlicePos = Vector3(0, 0, 0);
 	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
 }
 
@@ -2935,7 +2935,7 @@ std::string FluidMechanics::getPointSelectionData()
 	sprintf(c, "%d;", impl->settings->selectionMode);
 	data+=c;
 
-	for(uint32_t i=0; i < impl->listPointSelection.size(); i+=3) //On  a pas besoin de tous les points ! il y en a trop
+	for(uint32_t i=0; i < impl->listPointSelection.size(); i+=2) //On  a pas besoin de tous les points ! il y en a trop
 	{
 		Vector3 v = impl->listPointSelection[i];
 		sprintf(c, "%.2f;%.2f;", v.x, v.y);

@@ -20,10 +20,10 @@ public class Client extends AsyncTask<String, String, String>{
     //protected String hostName = "192.168.0.133" ;        //Aviz computer
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
 //    protected String hostName="10.0.0.1";               //Local
-//	protected String hostName = "192.168.1.95";           //Mickael Computer
+	protected String hostName = "192.168.1.95";           //Mickael Computer
 //	protected String hostName = "192.168.1.48";           //Mickael Computer
 //	protected String hostName = "192.168.1.53";           //Mickael Computer
-	protected String hostName = "192.168.43.192";
+//	protected String hostName = "192.168.43.192";
     protected int portNumber = 8500;
     //protected Socket clientSocket ;
     protected DatagramSocket clientSocket ;
