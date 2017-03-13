@@ -122,6 +122,7 @@ public class MainActivity extends BaseARActivity
     private Button AddBtn ;
     private Button SubBtn ;
     private Button InterBtn ;
+    private Button ValidationBtn ;
     //private Button translateBtn ;
     //private ToggleButton dataORplane ;
     //private ToggleButton translateBtn ;
@@ -391,6 +392,9 @@ public class MainActivity extends BaseARActivity
 
         this.InterBtn = (Button) findViewById(R.id.InterBtn);
         this.InterBtn.setOnClickListener(this);
+
+        this.ValidationBtn = (Button) findViewById(R.id.Validation);
+        this.ValidationBtn.setOnClickListener(this);
 
         /*touchToggle = (ToggleButton) findViewById(R.id.touchToggle);
         touchToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -1705,6 +1709,28 @@ public class MainActivity extends BaseARActivity
             this.nbOfFingersButton+=1;
      
             updateDataSettings();
+        }
+
+        else if(v.getId == R.id.Validation){
+            AlertDialog.Builder adb = new AlertDialog.Builder(this);
+            adb.setView(alertDialogView);
+            adb.setTitle("Title of alert dialog");
+            adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO Log the final file, launch next dataset according to order
+
+                //EditText et = (EditText)alertDialogView.findViewById(R.id.EditText1);
+                //Toast.makeText(Tutoriel18_Android.this, et.getText(), Toast.LENGTH_SHORT).show();
+            } });
+
+
+            adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+                finish();
+                //TODO Check if that works
+            } });
+            adb.show();
         }
     }
 

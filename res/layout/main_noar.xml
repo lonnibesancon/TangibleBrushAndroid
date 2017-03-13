@@ -289,6 +289,14 @@
             android:id= "@+id/linearlayout5"
              >
 
+                  <Button
+                    android:id="@+id/validation"
+                    android:layout_gravity="right|bottom"
+                    android:layout_height="60dp"
+                    android:layout_width="100dp"
+                    android:layout_alignParentRight="true"
+                    android:text="-Y-" />
+
                    <ToggleButton
                       android:id="@+id/constrainToggle"
                       android:layout_gravity="left|bottom"
