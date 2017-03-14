@@ -200,6 +200,7 @@ public class MainActivity extends BaseARActivity
     public int pId = -1 ;
     private boolean fileOpened = false ;
 
+	private int[] datasetorder = new int[4];
 
     @Override
     protected int getAppType() {
@@ -230,6 +231,57 @@ public class MainActivity extends BaseARActivity
 					client.setPId(p);
 					sendData();
                     openFile();
+
+					if(pId <= 2){
+						datasetorder[0] = 1 ;
+						datasetorder[1] = 2 ;
+						datasetorder[2] = 4 ;
+						datasetorder[3] = 3 ;
+					}
+					else if(pId <= 4){
+						datasetorder[0] = 2 ;
+						datasetorder[1] = 3 ;
+						datasetorder[2] = 1 ;
+						datasetorder[3] = 4 ;
+					}
+					else if(pId <= 6){
+						datasetorder[0] = 3 ;
+						datasetorder[1] = 4 ;
+						datasetorder[2] = 2 ;
+						datasetorder[3] = 1 ;
+					}
+					else if(pId <= 8){
+						datasetorder[0] = 4 ;
+						datasetorder[1] = 1 ;
+						datasetorder[2] = 3 ;
+						datasetorder[3] = 2 ;
+					}
+					else if(pId <= 10){
+						datasetorder[0] = 1 ;
+						datasetorder[1] = 4 ;
+						datasetorder[2] = 2 ;
+						datasetorder[3] = 3 ;
+					}
+					else if(pId <= 12){
+						datasetorder[0] = 2 ;
+						datasetorder[1] = 1 ;
+						datasetorder[2] = 3 ;
+						datasetorder[3] = 4 ;
+					}
+					else if(pId <= 14){
+						datasetorder[0] = 3 ;
+						datasetorder[1] = 2 ;
+						datasetorder[2] = 4 ;
+						datasetorder[3] = 1 ;
+					}
+					else if(pId <= 16){
+						datasetorder[0] = 4 ;
+						datasetorder[1] = 3 ;
+						datasetorder[2] = 1 ;
+						datasetorder[3] = 2 ;
+					}
+
+					loadDataset(datasetorder[0]);
                 }
             }
           }
@@ -842,11 +894,13 @@ public class MainActivity extends BaseARActivity
         mDatasetLoaded = false;
 
         mDataSet = (id % 4);
+		if(mDataSet == 0)
+			mDataSet = 1;
         client.dataset = mDataSet ;
 
         // TODO: check exceptions + display error message
         // TODO: load in background?
-        switch (mDataSet) {
+/*        switch (mDataSet) {
         // switch ((mDataSet++ % 3)) {
             case ftle:
                 FluidMechanics.loadDataset(copyAssetsFileToStorage("data/hemisphere", false));
@@ -871,13 +925,16 @@ public class MainActivity extends BaseARActivity
 //                client.dataset = velocities ;
                 break;
 
-            /*case 4:
+            case 4:
                 //this.finishAffinity();
                 //android.os.Process.killProcess(android.os.Process.myPid());
                 //System.exit(0);
-                break ;*/
+                break ;
 
         }
+	*/
+
+		FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + Integer.toString(mDataSet), false));
 
         // We want the large display to change as well:
         client.valuesupdated = true ; 
