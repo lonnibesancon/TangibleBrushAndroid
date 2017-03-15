@@ -1308,6 +1308,9 @@ public class MainActivity extends BaseARActivity
                 loadDataset(velocities);
                 reset();
                 break ;
+            case R.id.action_endTraining:
+                //TODO ENDTRAINING
+                break ;
 
 
 

@@ -148,6 +148,9 @@
   <item android:title="Quit"
         android:id="@+id/action_quit" />
 
+  <item android:title="End Training"
+        android:id="@+id/action_endTraining"
+
   <!-- <item android:title="Test"
         android:id="@+id/action_test" /> -->
 
