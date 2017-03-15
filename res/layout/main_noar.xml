@@ -290,7 +290,7 @@
              >
 
                   <Button
-                    android:id="@+id/validation"
+                    android:id="@+id/Validation"
                     android:layout_gravity="right|bottom"
                     android:layout_height="60dp"
                     android:layout_width="100dp"

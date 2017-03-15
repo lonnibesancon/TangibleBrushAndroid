@@ -43,6 +43,7 @@ public:
 	void releaseParticles();
 
 	void buttonPressed();
+	void canLog();
 	float buttonReleased();
 
 	struct Settings;

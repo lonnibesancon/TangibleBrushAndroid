@@ -195,13 +195,14 @@ public class MainActivity extends BaseARActivity
     private boolean autoConstraint ;
     private boolean isConstrained = false ;
     private boolean dataOrTangibleValue = true ;
+	private boolean canLog=false;
     private TextView bluetoothState ;
 
 
     public int pId = -1 ;
     private boolean fileOpened = false ;
 
-	private int[] datasetorder = new int[4];
+	private int[] datasetorder = {1, 1, 1, 1};
 
     @Override
     protected int getAppType() {
@@ -282,7 +283,7 @@ public class MainActivity extends BaseARActivity
 						datasetorder[3] = 2 ;
 					}
 
-					loadDataset(datasetorder[0]);
+					loadDataset(0);
                 }
             }
           }
@@ -898,8 +899,6 @@ public class MainActivity extends BaseARActivity
         mDatasetLoaded = false;
 
         mDataSet = (id % 4);
-		if(mDataSet == 0)
-			mDataSet = 1;
         client.dataset = mDataSet ;
 
         // TODO: check exceptions + display error message
@@ -938,7 +937,7 @@ public class MainActivity extends BaseARActivity
         }
 	*/
 
-		FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + Integer.toString(mDataSet), false));
+		FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + Integer.toString(datasetorder[mDataSet]), false));
 
         // We want the large display to change as well:
         client.valuesupdated = true ; 
@@ -954,7 +953,6 @@ public class MainActivity extends BaseARActivity
         updateSettings();
         mDatasetLoaded = true;
         requestRender();
-
     }
 
         @Override
@@ -1768,16 +1766,32 @@ public class MainActivity extends BaseARActivity
             updateDataSettings();
         }
 
-        else if(v.getId == R.id.Validation){
+        else if(v.getId() == R.id.Validation){
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
-            adb.setView(alertDialogView);
-            adb.setTitle("Title of alert dialog");
+//            adb.setView(alertDialogView);
+			if(!canLog)
+				adb.setTitle("Sommes nous prêt à commencer ?");
+			else
+				adb.setTitle("Valider le résultat ?");
+
             adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 //TODO Log the final file, launch next dataset according to order
 
                 //EditText et = (EditText)alertDialogView.findViewById(R.id.EditText1);
                 //Toast.makeText(Tutoriel18_Android.this, et.getText(), Toast.LENGTH_SHORT).show();
+				client.inValidation();
+				if(!canLog)
+				{
+					canLog = true;
+					FluidMechanics.canLog();
+					requestRender();
+				}
+				else
+				{
+					canLog = false;
+					loadNewData();
+				}
             } });
 
 

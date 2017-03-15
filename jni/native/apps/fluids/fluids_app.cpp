@@ -88,6 +88,10 @@ extern "C" {
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSubData(JNIEnv* env, jobject obj);
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPointSelectionData(JNIEnv* env, jobject obj);
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getTabletMatrix(JNIEnv* env, jobject obj);
+
+
+
+	JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_canLog(JNIEnv* env, jobject obj);
 }
 
 // (end of JNI interface)
@@ -417,6 +421,13 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 
 //	modelSize = Vector3(spacing[0]*dataDim[0], spacing[1]*dataDim[1], spacing[2]*dataDim[2]);
 	modelSize = particuleObject->getSize();
+
+	currentDataPos=Vector3(0.0, 0.0, modelSize.z+150);
+	currentDataRot=Quaternion(Vector3::unitX(), M_PI);
+	state->modelMatrix = Matrix4::makeTransform(currentDataPos, currentDataRot, Vector3(1.0));
+	currentSliceRot = Quaternion(Vector3::unitX(), 0);
+	currentSlicePos = Vector3(0, 0, 0);
+	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
 
 	// Compute a default zoom value according to the data dimensions
 	// static const float nativeSize = 128.0f;
@@ -2700,6 +2711,25 @@ JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_changeSelectionMode
 	}
 }
 
+JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_canLog(JNIEnv* env, jobject obj)
+{
+	try {
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+
+		instance->canLog();
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+}
+
 FluidMechanics::FluidMechanics(const InitParams& params)
  : NativeApp(params, SettingsPtr(new FluidMechanics::Settings), StatePtr(new FluidMechanics::State)),
    impl(new Impl(params.baseDir)), indiceSelection(0)
@@ -2948,4 +2978,17 @@ void FluidMechanics::changeSelectionMode()
 {
 	impl->pointSelectionToSend = true;
 	impl->pointSelectionIsSend = false;
+}
+
+void FluidMechanics::canLog()
+{
+	Vector3 modelSize = impl->particuleObject->getSize();
+
+	impl->currentSliceRot = Quaternion(Vector3::unitX(), 0);
+	impl->currentSlicePos = Vector3(0, 0, 0);
+	impl->tangibleMatrix = Matrix4::makeTransform(-impl->currentSlicePos, impl->currentSliceRot, Vector3(1.0, 1.0, 1.0));
+
+	impl->currentDataPos=Vector3(0.0, 0.0, modelSize.z+150);
+	impl->currentDataRot=Quaternion(Vector3::unitX(), M_PI);
+	impl->state->modelMatrix = Matrix4::makeTransform(impl->currentDataPos, impl->currentDataRot, Vector3(1.0));
 }

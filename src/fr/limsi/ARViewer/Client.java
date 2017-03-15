@@ -19,11 +19,11 @@ public class Client extends AsyncTask<String, String, String>{
 	//protected String hostName = "192.168.1.41" ;       //Home computer
     //protected String hostName = "192.168.0.133" ;        //Aviz computer
     //protected String hostName = "192.168.1.101" ;        //Aviz computer2
-//    protected String hostName="10.0.0.1";               //Local
+    protected String hostName="10.0.0.1";               //Local
 //	protected String hostName = "192.168.1.95";           //Mickael Computer
 //	protected String hostName = "192.168.1.48";           //Mickael Computer
 //	protected String hostName = "192.168.1.53";           //Mickael Computer
-	protected String hostName = "192.168.43.192";
+//	protected String hostName = "192.168.43.192";
     protected int portNumber = 8500;
     //protected Socket clientSocket ;
     protected DatagramSocket clientSocket ;
@@ -41,6 +41,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean tabletMatrixUpdated = false;
 	protected boolean pIdUpdated = false;
 	protected boolean tangoUpdated = false;
+	protected boolean validationUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -316,6 +317,25 @@ public class Client extends AsyncTask<String, String, String>{
 					}while(counterTries < 4);
 					pIdUpdated = false;
 				}
+
+				if(this.validationUpdated)
+				{
+					byte[] data = ("a;").getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					validationUpdated = false;
+				}
+
 				mLastTimestamp = currentTimestamp ;
             }
         }
@@ -400,5 +420,10 @@ public class Client extends AsyncTask<String, String, String>{
 	{
 		this.tangoData = d;
 		this.tangoUpdated = true;
+	}
+
+	protected void inValidation()
+	{
+		this.validationUpdated = true;
 	}
 }

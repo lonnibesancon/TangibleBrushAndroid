@@ -66,4 +66,6 @@ public class FluidMechanics {
 	public static native String getPointSelectionData();
 	public static native String getTabletMatrix();
 	public static native void changeSelectionMode();
+
+	public static native void canLog();
 }
