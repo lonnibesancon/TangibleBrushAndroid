@@ -494,6 +494,7 @@ public class MainActivity extends BaseARActivity
 				FluidMechanics.setConstrainSelection(fluidSettings.constrainSelection);
             }
         });
+		constrainToggle.setChecked(true); //Constrain automatically
 
         /*dataORplaneTouchToggle = (ToggleButton) findViewById(R.id.dataORplaneTouch);
         dataORplaneTouchToggle.setChecked(true);

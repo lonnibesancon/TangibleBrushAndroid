@@ -42,6 +42,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean pIdUpdated = false;
 	protected boolean tangoUpdated = false;
 	protected boolean validationUpdated = false;
+	protected boolean changeTrainingUpdated = false;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -336,6 +337,24 @@ public class Client extends AsyncTask<String, String, String>{
 					validationUpdated = false;
 				}
 
+				if(this.changeTrainingUpdated)
+				{
+					byte[] data = ("b;").getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					changeTrainingUpdated = false;
+				}
+
 				mLastTimestamp = currentTimestamp ;
             }
         }
@@ -425,5 +444,10 @@ public class Client extends AsyncTask<String, String, String>{
 	protected void inValidation()
 	{
 		this.validationUpdated = true;
+	}
+
+	protected void changeInTraining()
+	{
+		this.changeTrainingUpdated = true;
 	}
 }
