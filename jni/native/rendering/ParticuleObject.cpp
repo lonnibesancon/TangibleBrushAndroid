@@ -26,7 +26,7 @@ namespace
 		"void main() {\n"
 //		"  highp vec4 viewSpacePos = modelView * vec4(vertex * vec3(1.0, 1.0, -1.0), 1.0);\n"
 
-		"  gl_PointSize = 2.5;\n"
+		"  gl_PointSize = 3.0;\n"
 		"  gl_Position = projection * modelView * vec4(vertex, 1.0);\n"
 		"  v_color = color;\n"
 //		"  gl_Size = 2.0;\n"
@@ -85,25 +85,24 @@ ParticuleObject::ParticuleObject(const std::string& fileStats, const std::string
 	{
 		switch(mPointsStats[i])
 		{
+			
 			case 0:
-				mColor[3*i] = 0.086;
-				mColor[3*i+1] = 0.31;
-				mColor[3*i+2] = 0.6;
-				mColor[3*i+3] = 0.6;
+				mColor[3*i] = 0.02;
+				mColor[3*i+1] = 0.44;
+				mColor[3*i+2] = 0.69;
+				mColor[3*i+3] = 0.65;
 				break;
-/*			case 1:
-				mColor[3*i] = 1.0;
-				mColor[3*i+1] = 0.84;
-				mColor[3*i+2] = 0.19;
-				mColor[3*i+3] = 0.6;
-				break;
-*/
 			case 1:
+				mColor[3*i] = 0.79;
+				mColor[3*i+1] = 0;
+				mColor[3*i+2] = 0.13;
+				mColor[3*i+3] = 0.65;
+				break;
 			case 2:
-				mColor[3*i] = 0.77;
-				mColor[3*i+1] = 0.835;
-				mColor[3*i+2] = 0.86;
-				mColor[3*i+3] = 0.4;
+				mColor[3*i] = 0.02;
+				mColor[3*i+1] = 0.44;
+				mColor[3*i+2] = 0.69;
+				mColor[3*i+3] = 0.6;
 				break;
 		}
 	}

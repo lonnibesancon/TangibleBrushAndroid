@@ -146,6 +146,7 @@
             >
                 <Button
                 android:id="@+id/addBtn"
+                android:background="@drawable/splus_notselected"
                 android:layout_height="70dp"
                 android:layout_width="70dp"
                 android:layout_marginBottom="20dp"
@@ -153,6 +154,7 @@
                 />
                 <Button
                 android:id="@+id/SubBtn"
+                android:background="@drawable/sminus_notselected"
                 android:layout_height="70dp"
                 android:layout_width="70dp"
                 android:layout_marginBottom="20dp"
@@ -160,6 +162,7 @@
                 />
                 <Button
                 android:id="@+id/InterBtn"
+                android:background="@drawable/sintersection_notselected"
                 android:layout_height="70dp"
                 android:layout_width="70dp"
                 android:layout_marginBottom="20dp"
@@ -200,6 +203,7 @@
 
                   <Button
                           android:id="@+id/resetBtn"
+                          android:background="@drawable/accept"
                           android:layout_gravity="right|bottom"
                           android:layout_height="60dp"
                           android:layout_width="100dp"

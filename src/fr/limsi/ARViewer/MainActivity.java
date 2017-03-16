@@ -336,7 +336,7 @@ public class MainActivity extends BaseARActivity
 
         FluidMechanics.getSettings(fluidSettings);
         FluidMechanics.getState(fluidState);
-        fluidSettings.precision = 1 ;
+        fluidSettings.precision = 0.7f ;
         fluidSettings.translatePlane = false ;
         interactionMode = planeTouchTangible ;
         isTangibleOn = true ;
@@ -1362,7 +1362,7 @@ public class MainActivity extends BaseARActivity
         interactionMode = dataTouchTangible ;
         dataORplaneTangible = true ; //Data
         dataORplaneTouch = true ;    //Data
-        fluidSettings.precision = 1 ;
+        fluidSettings.precision = 0.7f ;
 
         this.nbOfResets += 1 ;
         updateDataSettings();
@@ -1768,6 +1768,9 @@ public class MainActivity extends BaseARActivity
             fluidSettings.selectionMode = ADD ;
 			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
+            AddBtn.setBackgroundResource(R.drawable.splus);
+            SubBtn.setBackgroundResource(R.drawable.sminus_notselected);
+            InterBtn.setBackgroundResource(R.drawable.sintersection_notselected);
             
             updateDataSettings();
         }
@@ -1776,6 +1779,9 @@ public class MainActivity extends BaseARActivity
             fluidSettings.selectionMode = SUB ;
 			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
+            AddBtn.setBackgroundResource(R.drawable.splus_notselected);
+            SubBtn.setBackgroundResource(R.drawable.sminus);
+            InterBtn.setBackgroundResource(R.drawable.sintersection_notselected);
             updateDataSettings();
         }
 
@@ -1783,6 +1789,9 @@ public class MainActivity extends BaseARActivity
             fluidSettings.selectionMode = INTER ;
 			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
+            AddBtn.setBackgroundResource(R.drawable.splus_notselected);
+            SubBtn.setBackgroundResource(R.drawable.sminus_notselected);
+            InterBtn.setBackgroundResource(R.drawable.sintersection);
      
             updateDataSettings();
         }
