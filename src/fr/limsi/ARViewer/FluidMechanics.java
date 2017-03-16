@@ -33,7 +33,7 @@ public class FluidMechanics {
         float computedZoomFactor;
     }
 
-    public static native boolean loadDataset(String filename); // VTK format
+    public static native boolean loadDataset(String filename, int nbAngle); // VTK format
     public static native boolean loadVelocityDataset(String filename); // VTK format
 
     public static native void initQCAR();

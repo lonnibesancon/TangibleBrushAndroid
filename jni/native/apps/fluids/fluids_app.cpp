@@ -55,7 +55,7 @@
 
 extern "C" {
 	JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_setConstrainSelection(JNIEnv* env, jclass cls, jboolean b);
-	JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadDataset(JNIEnv* env, jobject obj, jstring filename);
+	JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadDataset(JNIEnv* env, jobject obj, jstring filename, int nbAngle);
 	JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadVelocityDataset(JNIEnv* env, jobject obj, jstring filename);
 
 	// JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_initQCAR(JNIEnv* env, jobject obj);
@@ -109,7 +109,7 @@ struct FluidMechanics::Impl
 {
 	Impl(const std::string& baseDir);
 
-	bool loadDataSet(const std::string& fileName);
+	bool loadDataSet(const std::string& fileName, int nbAngle);
 	bool loadVelocityDataSet(const std::string& fileName);
 
 	// void initQCAR();
@@ -260,6 +260,9 @@ struct FluidMechanics::Impl
 
 	ParticuleObject* particuleObject=NULL;
 	std::string modelPath;
+
+	Quaternion startAngle[3];
+	int mNbAngle=0;
 };
 
 FluidMechanics::Impl::Impl(const std::string& baseDir)
@@ -294,16 +297,24 @@ FluidMechanics::Impl::Impl(const std::string& baseDir)
 	lastFingerID=-1;
 	newData = false;
 	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
+
+	startAngle[0] = Quaternion(0.780, 0.2, -0.215, 0.552);
+	startAngle[1] = Quaternion(0.840, -0.132, 0.052, 0.523);
+	startAngle[2] = Quaternion(0.5136, -0.006, -0.0192, 0.8577);
 }
 
 void FluidMechanics::Impl::reset(){
 	seedingPoint = Vector3(-1,-1,-1);
 	
 	currentSliceRot = Quaternion(Vector3::unitX(), 0);
-//	currentDataRot = Quaternion(Vector3::unitX(), M_PI);
 	currentSlicePos = Vector3(0, 0, 0);
-//	currentDataPos = Vector3(0,0,0);
+	modelSize = particuleObject->getSize();
+
+	currentDataPos=Vector3(0.0, 0.0, modelSize.z+150);
+	currentDataRot = startAngle[mNbAngle];
 	buttonIsPressed = false ;
+
+	state->modelMatrix = Matrix4::makeTransform(currentDataPos, currentDataRot, Vector3(1.0, 1.0, 1.0));
 
 //	for (Particle& p : particles)
 //		p.valid = false;
@@ -384,7 +395,7 @@ vtkSmartPointer<vtkImageData> FluidMechanics::Impl::loadTypedDataSet(const std::
 	return data;
 }
 
-bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
+bool FluidMechanics::Impl::loadDataSet(const std::string& fileName, int nbAngle)
 {
 /*	synchronized (particles) {
 		// Unload velocity data
@@ -423,11 +434,13 @@ bool FluidMechanics::Impl::loadDataSet(const std::string& fileName)
 	modelSize = particuleObject->getSize();
 
 	currentDataPos=Vector3(0.0, 0.0, modelSize.z+150);
-	currentDataRot=Quaternion(Vector3::unitX(), M_PI);
-	state->modelMatrix = Matrix4::makeTransform(currentDataPos, currentDataRot, Vector3(1.0));
+	currentDataRot=startAngle[nbAngle];
+	mNbAngle = nbAngle;
+
+	state->modelMatrix = Matrix4::makeTransform(currentDataPos, currentDataRot, Vector3(1.0, 1.0, 1.0));
 	currentSliceRot = Quaternion(Vector3::unitX(), 0);
 	currentSlicePos = Vector3(0, 0, 0);
-	tangibleMatrix = Matrix4::makeTransform(-currentSlicePos, currentSliceRot, Vector3(1.0, 1.0, 1.0));
+	tangibleMatrix = Matrix4::identity();
 
 	// Compute a default zoom value according to the data dimensions
 	// static const float nativeSize = 128.0f;
@@ -1047,7 +1060,8 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 			if( interactionMode == planeTangible ||
 			    interactionMode == planeTouchTangible ||
-			    interactionMode == dataPlaneTouchTangible)
+			    interactionMode == dataPlaneTouchTangible ||
+				interactionMode == dataPlaneTangibleTouch)
 			{
 
 				//currentSlicePos += trans ;	Version with the plane moving freely in the world
@@ -1076,8 +1090,8 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				newData = true;
 			}
 			else if( interactionMode == dataTangible || 
-				interactionMode == dataTouchTangible ||
-				interactionMode == dataPlaneTangibleTouch)
+				interactionMode == dataTouchTangible
+				)
 			{
 				trans.x *= settings->considerX ;//* settings->considerTranslation ;
 				trans.y *= settings->considerY ;//* settings->considerTranslation ;
@@ -1087,10 +1101,7 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 
 				if(hasSelection)
 				{
-					synchronized(postTreatmentTrans)
-					{
-						postTreatmentTrans = postTreatmentTrans + trans;
-					}
+					postTreatmentTrans = postTreatmentTrans + trans;
 				}
 			}
 		}
@@ -1827,6 +1838,8 @@ void FluidMechanics::Impl::renderObjects()
 	updateMatrices();
 	//checkPosition();
 
+
+	LOGE("%f, %f, %f, %f", currentDataRot.x, currentDataRot.y, currentDataRot.z, currentDataRot.w);
 	const Matrix4 proj = app->getProjMatrix() * tangibleMatrix;
 	//const Matrix4 proj = app->getOrthoProjMatrix() * tangibleMatrix;
 	glEnable(GL_DEPTH_TEST);
@@ -1916,7 +1929,7 @@ void FluidMechanics::Impl::renderObjects()
 		mm = mm * Matrix4::makeTransform(
 			Vector3::zero(),
 			Quaternion::identity(),
-			Vector3(settings->zoomFactor)
+			Vector3(0.75*settings->zoomFactor)
 		);
 
 		//Render the outline
@@ -2176,7 +2189,7 @@ void FluidMechanics::Impl::updateSurfacePreview()
 }
 
 JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadDataset(JNIEnv* env,
-	jobject obj, jstring filename)
+	jobject obj, jstring filename, int nbAngle)
 {
 	try {
 		// LOGD("(JNI) [FluidMechanics] loadDataSet()");
@@ -2195,7 +2208,7 @@ JNIEXPORT jboolean JNICALL Java_fr_limsi_ARViewer_FluidMechanics_loadDataset(JNI
 
 		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
 		android_assert(instance);
-		return instance->loadDataSet(filenameStr);
+		return instance->loadDataSet(filenameStr, nbAngle);
 
 	} catch (const std::exception& e) {
 		throwJavaException(env, e.what());
@@ -2739,14 +2752,14 @@ FluidMechanics::FluidMechanics(const InitParams& params)
 	impl->state = std::static_pointer_cast<FluidMechanics::State>(state);
 }
 
-bool FluidMechanics::loadDataSet(const std::string& fileName)
+bool FluidMechanics::loadDataSet(const std::string& fileName, int nbAngle)
 {
-	impl->setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),
-	                  Matrix4::makeTransform(Vector3(0, 0, 400)));
-	impl->currentSlicePos = Vector3(0, 0, 0);
-	impl->currentDataPos = Vector3(0,0,400);
-	impl->tangibleMatrix = Matrix4::makeTransform(-impl->currentSlicePos, impl->currentSliceRot);
-	return impl->loadDataSet(fileName);
+//	impl->setMatrices(Matrix4::makeTransform(Vector3(0, 0, 400)),
+//	                  Matrix4::makeTransform(Vector3(0, 0, 400)));
+//	impl->currentSlicePos = Vector3(0, 0, 0);
+//	impl->currentDataPos = Vector3(0,0,400);
+//	impl->tangibleMatrix = Matrix4::makeTransform(-impl->currentSlicePos, impl->currentSliceRot);
+	return impl->loadDataSet(fileName, nbAngle);
 }
 
 bool FluidMechanics::loadVelocityDataSet(const std::string& fileName)
@@ -2989,6 +3002,6 @@ void FluidMechanics::canLog()
 	impl->tangibleMatrix = Matrix4::makeTransform(-impl->currentSlicePos, impl->currentSliceRot, Vector3(1.0, 1.0, 1.0));
 
 	impl->currentDataPos=Vector3(0.0, 0.0, modelSize.z+150);
-	impl->currentDataRot=Quaternion(Vector3::unitX(), M_PI);
+	impl->currentDataRot=impl->startAngle[impl->mNbAngle];
 	impl->state->modelMatrix = Matrix4::makeTransform(impl->currentDataPos, impl->currentDataRot, Vector3(1.0));
 }

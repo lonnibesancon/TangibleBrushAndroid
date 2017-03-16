@@ -18,14 +18,15 @@ namespace
 		"uniform highp mat4 modelView;\n"
 		"uniform lowp vec3 dimensions;\n" // (dimX,dimY,dimZ)
 		"attribute highp vec3 vertex;\n"
-		"attribute highp vec3 color;\n"
-		"varying highp vec3 v_color;\n"
+		"attribute highp vec4 color;\n"
+		"varying highp vec4 v_color;\n"
 
 		"uniform highp vec4 clipPlane;\n"
 
 		"void main() {\n"
 //		"  highp vec4 viewSpacePos = modelView * vec4(vertex * vec3(1.0, 1.0, -1.0), 1.0);\n"
 
+		"  gl_PointSize = 2.5;\n"
 		"  gl_Position = projection * modelView * vec4(vertex, 1.0);\n"
 		"  v_color = color;\n"
 //		"  gl_Size = 2.0;\n"
@@ -40,10 +41,10 @@ namespace
 		"#endif\n"
 
 		"//#extension GL_OES_texture_3D : require\n"
-		"varying highp vec3 v_color;\n"
+		"varying highp vec4 v_color;\n"
 
 		"void main() {\n"
-		"gl_FragColor = vec4(v_color, 1.0);\n"
+		"gl_FragColor = v_color;\n"
 		"}";
 }
 
@@ -59,12 +60,12 @@ ParticuleObject::ParticuleObject(const std::string& fileStats, const std::string
 
     stat(fileStats.c_str(), &st1);
 	stat(fileData.c_str(), &st2);
-	mNbParticules = fmin(st1.st_size, st2.st_size);
+	mNbParticules = fmin(st1.st_size/sizeof(int), st2.st_size/(3*sizeof(float)));
 
 	//Init the array
 	mPoints = (float*)malloc(sizeof(float)*3*mNbParticules);
 	mPointsStats = (int*)malloc(sizeof(int)*mNbParticules);
-	mColor = (float*)malloc(sizeof(float)*3*mNbParticules);
+	mColor = (float*)malloc(sizeof(float)*4*mNbParticules);
 
 	fread(mPoints, sizeof(float), 3*mNbParticules, fdPoints);
 	fread(mPointsStats, sizeof(int), mNbParticules, fdStats);
@@ -85,19 +86,24 @@ ParticuleObject::ParticuleObject(const std::string& fileStats, const std::string
 		switch(mPointsStats[i])
 		{
 			case 0:
-				mColor[3*i] = 0.0;
-				mColor[3*i+1] = 1.0;
-				mColor[3*i+2] = 0.0;
+				mColor[3*i] = 0.086;
+				mColor[3*i+1] = 0.31;
+				mColor[3*i+2] = 0.6;
+				mColor[3*i+3] = 0.6;
 				break;
-			case 1:
+/*			case 1:
 				mColor[3*i] = 1.0;
-				mColor[3*i+1] = 0.0;
-				mColor[3*i+2] = 0.0;
+				mColor[3*i+1] = 0.84;
+				mColor[3*i+2] = 0.19;
+				mColor[3*i+3] = 0.6;
 				break;
+*/
+			case 1:
 			case 2:
-				mColor[3*i] = 0.0;
-				mColor[3*i+1] = 0.0;
-				mColor[3*i+2] = 1.0;
+				mColor[3*i] = 0.77;
+				mColor[3*i+1] = 0.835;
+				mColor[3*i+2] = 0.86;
+				mColor[3*i+3] = 0.4;
 				break;
 		}
 	}
@@ -175,11 +181,10 @@ void ParticuleObject::render(const Matrix4& projectionMatrix, const Matrix4& mod
 	glUseProgram(mMaterial->getHandle());
 	glEnableVertexAttribArray(mVertexAttrib);
 	glEnableVertexAttribArray(mColorAttrib);
-//	glPointSize(1.0f);
 
 	//Vertices
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, false, 0, mPoints);
-	glVertexAttribPointer(mColorAttrib, 3, GL_FLOAT, 0, false, mColor);
+	glVertexAttribPointer(mColorAttrib, 4, GL_FLOAT, 0, false, mColor);
 
 	//Uniform
 	glUniformMatrix4fv(mProjectionUniform, 1, false, projectionMatrix.data_);

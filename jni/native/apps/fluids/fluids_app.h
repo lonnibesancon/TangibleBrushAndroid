@@ -15,7 +15,7 @@ public:
 
 	void setMatrices(const Matrix4& volumeMatrix, const Matrix4& stylusMatrix);
 
-	bool loadDataSet(const std::string& fileName);
+	bool loadDataSet(const std::string& fileName, int nbAngle);
 	bool loadVelocityDataSet(const std::string& fileName);
 
 	void setTangoValues(double tx, double ty, double tz, double rx, double ry, double rz, double q);

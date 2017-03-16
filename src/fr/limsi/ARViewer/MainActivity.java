@@ -196,6 +196,7 @@ public class MainActivity extends BaseARActivity
     private boolean isConstrained = false ;
     private boolean dataOrTangibleValue = true ;
 	private boolean canLog=false;
+	private boolean inTraining = true;
     private TextView bluetoothState ;
 
 
@@ -472,6 +473,11 @@ public class MainActivity extends BaseARActivity
                 if (isChecked) {
                     interactionMode = dataTouchTangible ;
                 } else {
+					if(!canLog)
+					{
+						selectionToggle.setChecked(true);
+						return;
+					}
                     interactionMode = planeTouchTangible ;
                 }
                 //setInteractionMode();
@@ -479,8 +485,9 @@ public class MainActivity extends BaseARActivity
 				client.setInteractionMode("6" + interactionMode);
 				Log.e("Main", "setInteractionMode");
             }
-
         });
+
+		selectionToggle.setChecked(true);
 
         constrainToggle = (ToggleButton) findViewById(R.id.constrainToggle);
         constrainToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -494,7 +501,6 @@ public class MainActivity extends BaseARActivity
 				FluidMechanics.setConstrainSelection(fluidSettings.constrainSelection);
             }
         });
-		constrainToggle.setChecked(true); //Constrain automatically
 
         /*dataORplaneTouchToggle = (ToggleButton) findViewById(R.id.dataORplaneTouch);
         dataORplaneTouchToggle.setChecked(true);
@@ -545,6 +551,9 @@ public class MainActivity extends BaseARActivity
         lock.disableKeyguard();  
 
         
+		constrainToggle.setChecked(true); //Constrain automatically
+		fluidSettings.constrainSelection = true ;
+		FluidMechanics.setConstrainSelection(fluidSettings.constrainSelection);
     }
 
     //private void setInteractionMode(){
@@ -899,7 +908,9 @@ public class MainActivity extends BaseARActivity
     private void loadDataset(int id) {
         mDatasetLoaded = false;
 
-        mDataSet = (id % 4);
+        mDataSet = id;
+		if(id >= 12)
+			return;
         client.dataset = mDataSet ;
 
         // TODO: check exceptions + display error message
@@ -938,7 +949,10 @@ public class MainActivity extends BaseARActivity
         }
 	*/
 
-		FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + Integer.toString(datasetorder[mDataSet]), false));
+		if(inTraining)
+			FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + (inTraining ? "training" : "") + Integer.toString(datasetorder[id]), false), 0);
+		else
+			FluidMechanics.loadDataset(copyAssetsFileToStorage("data/" + (inTraining ? "training" : "") + Integer.toString(datasetorder[id/3]), false), id%3);
 
         // We want the large display to change as well:
         client.valuesupdated = true ; 
@@ -950,7 +964,6 @@ public class MainActivity extends BaseARActivity
         settings.zoomFactor = fluidState.computedZoomFactor * 0.75f;
         fluidSettings.showSlice = false ;
         fluidSettings.sliceType = FluidMechanics.SLICE_STYLUS ;
-        fluidSettings.constrainSelection = false ;
         updateSettings();
         mDatasetLoaded = true;
         requestRender();
@@ -1309,6 +1322,11 @@ public class MainActivity extends BaseARActivity
                 reset();
                 break ;
             case R.id.action_endTraining:
+				client.changeInTraining();
+				inTraining = !inTraining;
+				mDataSet = 0;	
+				canLog = false;
+				loadDataset(0);
                 //TODO ENDTRAINING
                 break ;
 
@@ -1345,7 +1363,6 @@ public class MainActivity extends BaseARActivity
         dataORplaneTangible = true ; //Data
         dataORplaneTouch = true ;    //Data
         fluidSettings.precision = 1 ;
-        fluidSettings.constrainSelection = false ;
 
         this.nbOfResets += 1 ;
         updateDataSettings();
@@ -1563,7 +1580,7 @@ public class MainActivity extends BaseARActivity
             int index = event.getActionIndex();
             //Log.d(TAG,"INDEX = "+fingerOnButtonIndex);
             if (event.getAction() == MotionEvent.ACTION_DOWN ){
-				client.setTangoData("8;" + ((this.interactionMode == planeTouchTangible) ? "1;" : "0;") + Integer.toString(this.interactionMode));
+				client.setTangoData("8;" + ((this.interactionMode == planeTouchTangible || this.interactionMode == planeTangible) ? "1;" : "0;") + Integer.toString(this.interactionMode));
                 isTangiblePressed = true ;
                 FluidMechanics.buttonPressed();
                 this.tangibleBtn.setPressed(true);
@@ -1744,27 +1761,27 @@ public class MainActivity extends BaseARActivity
             updateSettings();
 			client.setSelectionData("3");
 			FluidMechanics.reset();
+			requestRender();
         }
         else if(v.getId() == R.id.addBtn){
            
-			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = ADD ;
+			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
             
             updateDataSettings();
         }
 
         else if(v.getId() == R.id.SubBtn){
-			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = SUB ;
+			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
-            
             updateDataSettings();
         }
 
         else if(v.getId() == R.id.InterBtn){
-			FluidMechanics.changeSelectionMode();
             fluidSettings.selectionMode = INTER ;
+			FluidMechanics.changeSelectionMode();
             this.nbOfFingersButton+=1;
      
             updateDataSettings();
@@ -1775,34 +1792,46 @@ public class MainActivity extends BaseARActivity
 //            adb.setView(alertDialogView);
 			if(!canLog)
 				adb.setTitle("Sommes nous prêt à commencer ?");
+			else if(inTraining && mDataSet==3)
+				adb.setTitle("Pouvons nous commencer la study ?");
 			else
 				adb.setTitle("Valider le résultat ?");
 
-            adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                //TODO Log the final file, launch next dataset according to order
+			if(mDataSet < 11)
+			{
+				adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					//TODO Log the final file, launch next dataset according to order
 
-                //EditText et = (EditText)alertDialogView.findViewById(R.id.EditText1);
-                //Toast.makeText(Tutoriel18_Android.this, et.getText(), Toast.LENGTH_SHORT).show();
-				client.inValidation();
-				if(!canLog)
-				{
-					canLog = true;
-					FluidMechanics.canLog();
-					requestRender();
-				}
-				else
-				{
-					canLog = false;
-					loadNewData();
-				}
-            } });
-
+					//EditText et = (EditText)alertDialogView.findViewById(R.id.EditText1);
+					//Toast.makeText(Tutoriel18_Android.this, et.getText(), Toast.LENGTH_SHORT).show();
+					client.inValidation();
+					if(!canLog)
+					{
+						canLog = true;
+						FluidMechanics.canLog();
+						requestRender();
+					}
+					else
+					{
+						canLog = false;
+						if(inTraining && mDataSet==3)
+						{
+							inTraining = false;
+							mDataSet=0;
+							client.changeInTraining();
+							loadDataset(0);
+						}
+						else
+							loadNewData();
+					}
+				} });
+			}
 
             adb.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-
-                finish();
+				//TODO need to do nothing (normally)
+//                finish();
                 //TODO Check if that works
             } });
             adb.show();
@@ -1990,6 +2019,4 @@ public class MainActivity extends BaseARActivity
         scan();
         connect();
     }
-
-
 }
