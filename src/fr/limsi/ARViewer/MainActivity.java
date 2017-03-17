@@ -1820,10 +1820,13 @@ public class MainActivity extends BaseARActivity
 							inTraining = false;
 							mDataSet=0;
 							client.changeInTraining();
-							loadDataset(0);
+							loadNewData();
 						}
 						else
+						{
+							selectionToggle.setChecked(true);
 							loadNewData();
+						}
 					}
 				} });
 			}

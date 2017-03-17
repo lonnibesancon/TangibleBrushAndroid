@@ -85,25 +85,19 @@ ParticuleObject::ParticuleObject(const std::string& fileStats, const std::string
 	{
 		switch(mPointsStats[i])
 		{
-			case 0:
-				mColor[3*i] = 0.086;
-				mColor[3*i+1] = 0.31;
-				mColor[3*i+2] = 0.6;
-				mColor[3*i+3] = 0.6;
-				break;
-/*			case 1:
+			case 1:
 				mColor[3*i] = 1.0;
 				mColor[3*i+1] = 0.84;
 				mColor[3*i+2] = 0.19;
 				mColor[3*i+3] = 0.6;
 				break;
-*/
-			case 1:
+
+			case 0:
 			case 2:
 				mColor[3*i] = 0.77;
 				mColor[3*i+1] = 0.835;
 				mColor[3*i+2] = 0.86;
-				mColor[3*i+3] = 0.4;
+				mColor[3*i+3] = 0.7;
 				break;
 		}
 	}
