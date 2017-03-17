@@ -18,15 +18,15 @@ namespace
 		"uniform highp mat4 modelView;\n"
 		"uniform lowp vec3 dimensions;\n" // (dimX,dimY,dimZ)
 		"attribute highp vec3 vertex;\n"
-		"attribute highp vec4 color;\n"
-		"varying highp vec4 v_color;\n"
+		"attribute lowp vec4 color;\n"
+		"varying lowp vec4 v_color;\n"
 
 		"uniform highp vec4 clipPlane;\n"
 
 		"void main() {\n"
 //		"  highp vec4 viewSpacePos = modelView * vec4(vertex * vec3(1.0, 1.0, -1.0), 1.0);\n"
 
-		"  gl_PointSize = 2.5;\n"
+		"  gl_PointSize = 3.0;\n"
 		"  gl_Position = projection * modelView * vec4(vertex, 1.0);\n"
 		"  v_color = color;\n"
 //		"  gl_Size = 2.0;\n"
@@ -41,7 +41,7 @@ namespace
 		"#endif\n"
 
 		"//#extension GL_OES_texture_3D : require\n"
-		"varying highp vec4 v_color;\n"
+		"varying lowp vec4 v_color;\n"
 
 		"void main() {\n"
 		"gl_FragColor = v_color;\n"
@@ -85,19 +85,23 @@ ParticuleObject::ParticuleObject(const std::string& fileStats, const std::string
 	{
 		switch(mPointsStats[i])
 		{
-			case 1:
-				mColor[3*i] = 1.0;
-				mColor[3*i+1] = 0.84;
-				mColor[3*i+2] = 0.19;
-				mColor[3*i+3] = 0.6;
-				break;
-
 			case 0:
+				mColor[3*i] = 0.02;
+				mColor[3*i+1] = 0.44;
+				mColor[3*i+2] = 0.69;
+				mColor[3*i+3] = 0.65;
+				break;
+			case 1:
+				mColor[3*i] = 0.79;
+				mColor[3*i+1] = 0;
+				mColor[3*i+2] = 0.13;
+				mColor[3*i+3] = 0.65;
+				break;
 			case 2:
-				mColor[3*i] = 0.77;
-				mColor[3*i+1] = 0.835;
-				mColor[3*i+2] = 0.86;
-				mColor[3*i+3] = 0.7;
+				mColor[3*i] = 0.02;
+				mColor[3*i+1] = 0.44;
+				mColor[3*i+2] = 0.69;
+				mColor[3*i+3] = 0.6;
 				break;
 		}
 	}
@@ -178,7 +182,7 @@ void ParticuleObject::render(const Matrix4& projectionMatrix, const Matrix4& mod
 
 	//Vertices
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, false, 0, mPoints);
-	glVertexAttribPointer(mColorAttrib, 4, GL_FLOAT, 0, false, mColor);
+	glVertexAttribPointer(mColorAttrib, 4, GL_FLOAT, false, 0, mColor);
 
 	//Uniform
 	glUniformMatrix4fv(mProjectionUniform, 1, false, projectionMatrix.data_);
@@ -187,10 +191,11 @@ void ParticuleObject::render(const Matrix4& projectionMatrix, const Matrix4& mod
 	glUniform3f(mDimensionsUniform, getSize().x, getSize().y, getSize().z);
 
 
-	for(uint32_t i=0; i < mNbParticules; i+=1000)
-	{
-		glDrawArrays(GL_POINTS, i, fmin(1000, (mNbParticules-i)));
-	}
+//	for(uint32_t i=0; i < mNbParticules; i+=1000)
+//	{
+//		glDrawArrays(GL_POINTS, i, fmin(1000, (mNbParticules-i-1)));
+//	}
+	glDrawArrays(GL_POINTS, 0, mNbParticules);
 	glDisableVertexAttribArray(mVertexAttrib);
 	glDisableVertexAttribArray(mColorAttrib);
 	glUseProgram(0);

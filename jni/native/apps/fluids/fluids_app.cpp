@@ -716,7 +716,7 @@ void FluidMechanics::Impl::integrateParticleMotion(Particle& p)
 
 bool FluidMechanics::Impl::computeCameraClipPlane(Vector3& point, Vector3& normal)
 {
-	static const float weight = 0.8f;
+/*  static const float weight = 0.8f;
 	static bool wasVisible = false;
 	static Vector3 prevPos;
 
@@ -765,13 +765,13 @@ bool FluidMechanics::Impl::computeCameraClipPlane(Vector3& point, Vector3& norma
 
 	point = pt;
 	normal = -Vector3::unitZ();
-
+*/
 	return true;
 }
 
 bool FluidMechanics::Impl::computeAxisClipPlane(Vector3& point, Vector3& normal)
 {
-	if (state->tangibleVisible) {
+/*  if (state->tangibleVisible) {
 		Matrix3 normalMatrix = state->modelMatrix.inverse().transpose().get3x3Matrix();
 		float xDot = (normalMatrix*Vector3::unitX()).normalized().dot(Vector3::unitZ());
 		float yDot = (normalMatrix*Vector3::unitY()).normalized().dot(Vector3::unitZ());
@@ -856,7 +856,7 @@ bool FluidMechanics::Impl::computeAxisClipPlane(Vector3& point, Vector3& normal)
 
 	point = pt2;
 	normal = state->modelMatrix.inverse().transpose().get3x3Matrix() * axis;
-
+*/
 	return true;
 }
 
@@ -917,7 +917,7 @@ Matrix4 filter(const Matrix4& in, const Matrix4& prev, float posWeight, float ro
 
 bool FluidMechanics::Impl::computeStylusClipPlane(Vector3& point, Vector3& normal)
 {
-	if (!state->stylusVisible)
+/*  if (!state->stylusVisible)
 		return false;
 
 	// FIXME: state->stylusModelMatrix may be invalid (non-invertible) in some cases
@@ -939,8 +939,8 @@ bool FluidMechanics::Impl::computeStylusClipPlane(Vector3& point, Vector3& norma
 	Vector3 dataCoords = posToDataCoords(pt2);
 	slicingMatrix.setPosition(dataCoords);
 
-	synchronized(slice) {
-		slice->setSlice(slicingMatrix, -proj[1][1]*size*settings->zoomFactor, settings->zoomFactor);
+//	synchronized(slice) {
+//		slice->setSlice(slicingMatrix, -proj[1][1]*size*settings->zoomFactor, settings->zoomFactor);
 	}
 
 	synchronized(state->sliceModelMatrix) {
@@ -951,7 +951,7 @@ bool FluidMechanics::Impl::computeStylusClipPlane(Vector3& point, Vector3& norma
 	normal = state->stylusModelMatrix.inverse().transpose().get3x3Matrix() * Vector3::unitZ();
 
 	} catch (const std::exception& e) { LOGD("%s", e.what()); return false; }
-
+*/
 	return true;
 }
 
@@ -987,7 +987,7 @@ void FluidMechanics::Impl::setMatrices(const Matrix4& volumeMatrix, const Matrix
 		state->stylusModelMatrix = stylusMatrix;
 	}
 
-	updateSlicePlanes();
+//	updateSlicePlanes();
 }
 
 void FluidMechanics::Impl::setInteractionMode(int mode){
@@ -1210,7 +1210,7 @@ bool FluidMechanics::Impl::computeSeedingPlacement(){
 		if(success){
 			//To save energy with less rendering and computation, we do not render the particles on the tablet
 			seedingPoint = ray*t ;
-			releaseParticles();
+	//		releaseParticles();
 			return true ;
 		}
 		else{
@@ -1433,7 +1433,7 @@ void FluidMechanics::Impl::updateMatrices(){
 		state->modelMatrix = statem ;
 	}
 
-	updateSlicePlanes();
+//	updateSlicePlanes();
 }
 
 std::string FluidMechanics::Impl::getData(){
