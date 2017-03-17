@@ -1808,6 +1808,8 @@ public class MainActivity extends BaseARActivity
 
 			if(mDataSet < 11)
 			{
+				//Default : union
+				onClick(AddBtn);
 				adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					//TODO Log the final file, launch next dataset according to order
@@ -1823,7 +1825,7 @@ public class MainActivity extends BaseARActivity
 					}
 					else
 					{
-						canLog = false;
+						canLog = (mDataSet%3 != 0);
 						if(inTraining && mDataSet==3)
 						{
 							inTraining = false;

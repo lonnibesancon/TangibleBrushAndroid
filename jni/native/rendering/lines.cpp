@@ -79,9 +79,8 @@ void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatr
 
 	if (mLineData.empty())
 		return;
-	glLineWidth(8.0);
-
 	glUseProgram(mMaterial->getHandle());
+	glLineWidth(8.0);
 
 	// Vertices
 	glVertexAttribPointer(mVertexAttrib, 3, GL_FLOAT, false, 0, mLineData.data());
@@ -99,4 +98,5 @@ void Lines::render(const Matrix4& projectionMatrix, const Matrix4& modelViewMatr
 		glDrawArrays(GL_LINES, 0, mLineData.size()/3);
 
 	glDisableVertexAttribArray(mVertexAttrib);
+	glUseProgram(0);
 }
