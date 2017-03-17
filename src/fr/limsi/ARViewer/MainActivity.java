@@ -910,7 +910,14 @@ public class MainActivity extends BaseARActivity
 
         mDataSet = id;
 		if(id >= 12)
+		{
+			
+			AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			alert.setTitle("Finish");
+			alert.setTitle("Vous avez finis");
+			alert.setPositiveButton("OK", null);
 			return;
+		}
         client.dataset = mDataSet ;
 
         // TODO: check exceptions + display error message
@@ -1800,13 +1807,18 @@ public class MainActivity extends BaseARActivity
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
 //            adb.setView(alertDialogView);
 			if(!canLog)
-				adb.setTitle("Sommes nous prêt à commencer ?");
+			{
+				if(mDataSet >= 12)
+					adb.setTile("FINI !!!!");
+				else
+					adb.setTitle("Sommes nous prêt à commencer ?");
+			}
 			else if(inTraining && mDataSet==3)
 				adb.setTitle("Pouvons nous commencer la study ?");
 			else
 				adb.setTitle("Valider le résultat ?");
 
-			if(mDataSet < 11)
+			if(mDataSet < 12)
 			{
 				//Default : union
 				onClick(AddBtn);
@@ -1825,7 +1837,14 @@ public class MainActivity extends BaseARActivity
 					}
 					else
 					{
-						canLog = (mDataSet%3 != 0);
+						if(!inTraining)
+						{
+							Log.e("Main", Integer.toString(mDataSet));
+							canLog = ((mDataSet+1)%3 != 0);
+						}
+						else
+							canLog = false;
+
 						if(inTraining && mDataSet==3)
 						{
 							inTraining = false;
