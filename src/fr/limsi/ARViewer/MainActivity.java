@@ -1842,8 +1842,8 @@ public class MainActivity extends BaseARActivity
 							Log.e("Main", Integer.toString(mDataSet));
 							canLog = ((mDataSet+1)%3 != 0);
 						}
-						else
-							canLog = false;
+						/*else
+							canLog = false;*/
 
 						if(inTraining && mDataSet==3)
 						{
