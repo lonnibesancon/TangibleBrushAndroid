@@ -29,6 +29,7 @@ public:
 	bool getPointSelectionToSend();
 	bool getInSelection();
 	void changeSelectionMode();
+	void isEgo(bool b);
 
     std::string getData();
 	std::string getSelectionData();

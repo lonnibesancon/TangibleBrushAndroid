@@ -68,4 +68,5 @@ public class FluidMechanics {
 	public static native void changeSelectionMode();
 
 	public static native void canLog();
+    public static native void isEgo(boolean b);
 }

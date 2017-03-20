@@ -199,6 +199,8 @@ public class MainActivity extends BaseARActivity
 	private boolean inTraining = true;
     private TextView bluetoothState ;
 
+    private boolean isEgo = true ;
+
 
     public int pId = -1 ;
     private boolean fileOpened = false ;
@@ -1328,6 +1330,12 @@ public class MainActivity extends BaseARActivity
                 loadDataset(velocities);
                 reset();
                 break ;
+
+            case R.id.ego:
+                isEgo =!isEgo ;
+                FluidMechanics.isEgo(isEgo);
+                break ;
+
             case R.id.action_endTraining:
 				client.changeInTraining();
 				inTraining = !inTraining;
@@ -1357,7 +1365,7 @@ public class MainActivity extends BaseARActivity
         FluidMechanics.reset();
         isTouchOn = true ;
         //fluidSettings.dataORplane = 0 ; //Data 
-        
+        client.hasreset = true ;
         this.interactionMode = nothing ;
         //this.tangibleToggle.setChecked(false);
         //this.touchToggle.setChecked(false);
@@ -1806,10 +1814,11 @@ public class MainActivity extends BaseARActivity
         else if(v.getId() == R.id.Validation){
             AlertDialog.Builder adb = new AlertDialog.Builder(this);
 //            adb.setView(alertDialogView);
+            //client.inValidation();
 			if(!canLog)
 			{
 				if(mDataSet >= 12)
-					adb.setTile("FINI !!!!");
+					adb.setTitle("FINI !!!!");
 				else
 					adb.setTitle("Sommes nous prêt à commencer ?");
 			}

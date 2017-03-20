@@ -81,6 +81,7 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_changeSelectionMode(JNIEnv* env, jobject obj);
     JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getPointSelectionToSend(JNIEnv* env, jobject obj);
     JNIEXPORT bool JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getInSelection(JNIEnv* env, jobject obj);
+    JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_isEgo(JNIEnv* env, jobject obj, jboolean ego);
 
 	//Data to send to computer
 	JNIEXPORT jstring JNICALL Java_fr_limsi_ARViewer_FluidMechanics_getSelectionData(JNIEnv* env, jobject obj);
@@ -155,6 +156,9 @@ struct FluidMechanics::Impl
 	void onTranslateBar(float pos);
 	bool checkPosition();
 	void resetParticles();
+
+	void isEgo(bool ego);
+	bool ego = true ;
 
 
 	Vector3 posToDataCoords(const Vector3& pos); // "pos" is in eye coordinates
@@ -348,6 +352,10 @@ bool FluidMechanics::Impl::checkPosition(){
 
 	LOGD("Distance to data target = %f",distData);
 	LOGD("Distance to slice target = %f",distSlice);
+}
+
+void FluidMechanics::Impl::isEgo(bool b){
+	ego = b ;
 }
 
 void FluidMechanics::Impl::rebind()
@@ -1097,6 +1105,10 @@ void FluidMechanics::Impl::setTangoValues(double tx, double ty, double tz, doubl
 				trans.y *= settings->considerY ;//* settings->considerTranslation ;
 				trans.z *= settings->considerZ ; //* settings->considerTranslation ;
 
+				if(ego){
+					trans *= -1 ;	
+				}
+
 				currentDataPos +=trans ;
 
 				if(hasSelection)
@@ -1144,6 +1156,11 @@ void FluidMechanics::Impl::setGyroValues(double rx, double ry, double rz, double
 				interactionMode == dataTouchTangible ||
 				interactionMode == dataPlaneTangibleTouch)
 		{
+			if(ego){
+				rz *= -1 ;
+				ry *= -1 ;
+				rx *= -1 ;
+			}
 			Quaternion rot = currentDataRot;
 			rot = rot * Quaternion(rot.inverse() * (-Vector3::unitZ()), rz);
 			rot = rot * Quaternion(rot.inverse() * -Vector3::unitY(), ry);
@@ -2743,6 +2760,28 @@ JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_canLog(JNIEnv* env,
 	}
 }
 
+
+JNIEXPORT void JNICALL Java_fr_limsi_ARViewer_FluidMechanics_isEgo(JNIEnv* env, jobject obj, jboolean ego){
+	try {
+		// LOGD("(JNI) [FluidMechanics] loadVelocityDataSet()");
+
+		if (!App::getInstance())
+			throw std::runtime_error("init() was not called");
+
+		if (App::getType() != App::APP_TYPE_FLUID)
+			throw std::runtime_error("Wrong application type");
+
+		FluidMechanics* instance = dynamic_cast<FluidMechanics*>(App::getInstance());
+		android_assert(instance);
+		instance->isEgo(ego);
+
+	} catch (const std::exception& e) {
+		throwJavaException(env, e.what());
+	}
+}
+
+
+
 FluidMechanics::FluidMechanics(const InitParams& params)
  : NativeApp(params, SettingsPtr(new FluidMechanics::Settings), StatePtr(new FluidMechanics::State)),
    impl(new Impl(params.baseDir)), indiceSelection(0)
@@ -2991,6 +3030,10 @@ void FluidMechanics::changeSelectionMode()
 {
 	impl->pointSelectionToSend = true;
 	impl->pointSelectionIsSend = false;
+}
+
+void FluidMechanics::isEgo(bool b){
+	impl->isEgo(b);
 }
 
 void FluidMechanics::canLog()

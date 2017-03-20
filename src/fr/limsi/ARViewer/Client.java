@@ -43,6 +43,7 @@ public class Client extends AsyncTask<String, String, String>{
 	protected boolean tangoUpdated = false;
 	protected boolean validationUpdated = false;
 	protected boolean changeTrainingUpdated = false;
+	protected boolean hasreset = false ;
 
     protected short tangoEnable = 0 ;
     protected short considerX = 1 ;
@@ -353,6 +354,24 @@ public class Client extends AsyncTask<String, String, String>{
 						}
 					}while(counterTries < 4);
 					changeTrainingUpdated = false;
+				}
+
+				if(this.hasreset)
+				{
+					byte[] data = ("3;").getBytes();
+					DatagramPacket dp = new DatagramPacket(data, data.length, this.serverAddr, portNumber);
+					counterTries = 0 ;
+					do {
+						try {
+							clientSocket.send(dp);
+							Log.d("MessageSent", ""+msg);
+							break ;
+						}catch (Exception e) {
+							Log.e("ClientActivity", "SENDING ERROR "+ counterTries, e);
+							counterTries ++ ;
+						}
+					}while(counterTries < 4);
+					hasreset = false;
 				}
 
 				mLastTimestamp = currentTimestamp ;
